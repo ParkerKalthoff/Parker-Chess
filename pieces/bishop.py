@@ -18,17 +18,5 @@ class Bishop(piece.Piece):
         if isValidPos(position) == False:
             raise Exception(f"[{self.type}] Position Invalid : {position}")
 
-        potentialMoves = []
-
-        offsets = [-9, -7, 9, 7]
-
-        for offset in offsets:
-            for index in range(8):
-                pos = position + (offset * index)
-                if isValidPos(pos):
-                    potentialMoves.append(pos)
-                else:
-                    break
-        potentialMoves.sort()
-        return potentialMoves
+        
 
