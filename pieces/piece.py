@@ -12,37 +12,110 @@ class Piece():
         return None
     
 def isValidPos(position):
-    if position >= 1 and position <= 64:
+    if position >= 0 and position <= 63:
         return True
     return False
 
-def diagonals(position):
+
+
+def x_Pos(position):
+    return position % 8
+
+def y_Pos(position):
+    return math.floor(position/8)
+
+def xy_Pos(position):
+    x = x_Pos(position)
+    y = y_Pos(position)
+    return x, y
+# -------- --------  -------- --------  -------- -------- 
+ 
+def diagonals(position, board):
+
+    if not isValidPos(position):
+        raise IndexError
+
     potentialMoves = []
     offsets = [-9, -7, 7, 9]
 
-    x = (position - 1) % 8
-    y = math.floor((position - 1)/ 8)
+    x, y = xy_Pos(position)
+
+# --  --  --  --  -- 
+
+    # Top left
+    overflow = []
+
+    for index in range(max(x,y)):
+        mySquare = position + (-9 * (index + 1))
+
+        if not isValidPos(mySquare):
+            break
+
+        if len(overflow) > 0:
+            if max(overflow) < x_Pos(mySquare):
+                break
+        
+        overflow.append(x_Pos(mySquare))
+        potentialMoves.append(mySquare)
+
     
-    for index in range(max(x,y)): # top left
-        pos = position + (index * -9)
-        if isValidPos(pos):
-            potentialMoves.append(pos)
+# --  --  --  --  -- 
+        
+    # Top Right
+    overflow = []
 
-    for index in range(max(x,7-y)): # top right
-        pos = position + (index * -7)
-        if isValidPos(pos):
-            potentialMoves.append(pos)
+    for index in range(max(7-x,y)):
+        mySquare = position + (-7 * (index + 1))
 
-    for index in range(max(7-x,y)): # bottom left
-        pos = position + (index * 7)
-        if isValidPos(pos):
-            potentialMoves.append(pos)
+        if not isValidPos(mySquare):
+            break
 
-    for index in range(max(7-x,7-y)): # bottom left
-        pos = position + (index * 9)
-        if isValidPos(pos):
-            potentialMoves.append(pos)
+        if len(overflow) > 0:
+            if max(overflow) > x_Pos(mySquare):
+                break
+        
+        overflow.append(x_Pos(mySquare))
+        potentialMoves.append(mySquare)
+
+# --  --  --  --  -- 
+
+    # Bottom left
+    overflow = []
+
+    for index in range(max(x,7-y)):
+        mySquare = position + (7 * (index + 1))
+
+        if not isValidPos(mySquare):
+            break
+
+        if len(overflow) > 0:
+            if max(overflow) < x_Pos(mySquare):
+                break
+        
+        overflow.append(x_Pos(mySquare))
+        potentialMoves.append(mySquare)
+
     
+# --  --  --  --  -- 
+        
+    # Bottom Right
+    overflow = []
+
+    for index in range(max(7-x,7-y)):
+        mySquare = position + (9 * (index + 1))
+
+        if not isValidPos(mySquare):
+            break
+
+        if len(overflow) > 0:
+            if max(overflow) > x_Pos(mySquare):
+                break
+        
+        overflow.append(x_Pos(mySquare))
+        potentialMoves.append(mySquare)
+    
+# --  --  --  --  -- 
+
     results = []
 
     for index in potentialMoves:
