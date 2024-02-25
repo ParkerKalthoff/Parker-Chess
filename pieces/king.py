@@ -1,7 +1,7 @@
-import piece
-from piece import *
+from moves import *
+from piece import Piece
 
-class King(piece.Piece):
+class King(Piece):
 
 
     def __init__(self, color):
@@ -16,14 +16,7 @@ class King(piece.Piece):
         else: 
             return 'k' # B
 
-    def __getPotentialMoves__(position):
-        potentialMoves = []
-
-        offsets = [-9, -8, -7, -1, 0, 1, 7, 8, 9]
-
-        for offset in offsets:
-            pos = position + offset
-            if  isValidPos(pos):
-                potentialMoves.append(position + offset)
-        return potentialMoves
+    def __getPotentialMoves__(position, board):
+        
+        moveSet = squareMoves(position, board)
 

@@ -1,7 +1,7 @@
-import piece
-from piece import *
+from moves import *
+from piece import Piece
 
-class Queen(piece.Piece):
+class Queen(Piece):
 
 
     def __init__(self, color):
@@ -17,7 +17,7 @@ class Queen(piece.Piece):
 
     def __getPotentialMoves__(self, position, board):
 
-        diagonals(position, board)
+        moveSet = diagonals(position, board) + straight(position, board)
 
        
 

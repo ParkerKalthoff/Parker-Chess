@@ -1,7 +1,7 @@
-import piece
-from piece import *
+from moves import *
+from piece import Piece
 
-class Bishop(piece.Piece):
+class Bishop(Piece):
 
     def __init__(self, color):
         super().__init__(color)

@@ -1,7 +1,7 @@
-import piece
-from piece import *
+from moves import *
+from piece import Piece
 
-class Rook(piece.Piece):
+class Rook(Piece):
 
 
     def __init__(self, color):
@@ -15,3 +15,9 @@ class Rook(piece.Piece):
             return 'R' # W
         else: 
             return 'r' # B
+        
+    def __getPotentialMoves__(self, position, board):
+
+        moveSet = straight(position, board)
+
+       

@@ -1,7 +1,7 @@
-import piece
-from piece import *
+from moves import *
+from piece import Piece
 
-class Knight(piece.Piece):
+class Knight(Piece):
 
 
     def __init__(self, color):
