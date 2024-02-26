@@ -1,6 +1,10 @@
 import math
 
+# system path is annoying
 
+
+
+# system path is annoying
 
 def isValidPos(position):
     if position >= 0 and position <= 63:

@@ -19,5 +19,6 @@ class Rook(Piece):
     def __getPotentialMoves__(self, position, board):
 
         moveSet = straight(position, board)
+        return moveSet
 
        

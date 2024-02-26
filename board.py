@@ -7,7 +7,11 @@ from pieces.bishop import Bishop
 from pieces.knight import Knight
 from pieces.rook import Rook
 from pieces.pawn import Pawn
+import os
+import sys
 
+file_dir = os.path.dirname(__file__)
+sys.path.append(file_dir)
 
 
 class Board:
@@ -15,11 +19,27 @@ class Board:
 # fix import issues
     def __init__(self, fenString=None):
         self.__myBoard__ = [None]*64
+
+        self.__whitePieces__ = []
+        self.__blackPieces__ = []
+        self.__whiteScore__ = 0
+        self.__blackScore__ = 0
+        self.PIECE_VALUES = {
+            Queen: 9,
+            Rook: 5,
+            Bishop: 3,
+            Knight: 3,
+            Pawn: 1,
+            King: 0
+        }
         self.isWhitesTurn = True
         if fenString == None:
-            self.setBoard()
+            self.setBoardDefault()
+        self.refreshBoard()
 
-    def setBoard(self):
+# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+
+    def setBoardDefault(self):
         # White Back Rank, capital letters
         self.__myBoard__[0] = Rook("White")
         self.__myBoard__[1] = Knight("White")
@@ -49,13 +69,49 @@ class Board:
         for index in range(48,56):
             self.__myBoard__[index] = Pawn("Black")
 
-    def refreshBoard(self):
-        p = 0
+    def nextTurn(self):
+        self.isWhitesTurn = not self.isWhitesTurn
 
-    def __str__(self):
+    def whitePieces(self):
+        return self.__whitePieces__
+    
+    def blackPieces(self):
+        return self.__blackPieces__
+
+    def whiteScore(self):
+        return self.__whiteScore__
+    
+    def blackScore(self):
+        return self.__blackScore__
+
+    def refreshBoard(self):
+        self.__whitePieces__ = []
+        self.__blackPieces__ = []
+        self.__whiteScore__ = 0
+        self.__blackScore__ = 0
+
+        for index, indexValue in enumerate(self.__myBoard__):
+            if indexValue is not None:
+                if Piece.getColor(indexValue) == "White":
+                    self.__whitePieces__.append(index)
+                    self.__whiteScore__ += self.PIECE_VALUES[type(indexValue)]
+                else:
+                    self.__blackPieces__.append(index)
+                    self.__blackScore__ += self.PIECE_VALUES[type(indexValue)]
+
+
+# --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- --- 
+
+    def __str__(self, withChessCoords=False):
+        columnNum = ['1','2','3','4','5','6','7','8']
         output_str = " _______________________________\n"
+        if withChessCoords:
+            output_str = "  " + output_str
         for row in range(8):
             temp = "|"
+            if withChessCoords:
+                temp = columnNum[row]+ "-" + temp
+            
             for index in range(8):
                 if self.__myBoard__[(row*8)+index] == None:
                     temp += "___|"
@@ -63,9 +119,12 @@ class Board:
                     temp += f"_{self.__myBoard__[(row*8)+index].__str__()}_|"
             temp += "\n"
             output_str += temp
+        if withChessCoords:
+            output_str += "    a   b   c   d   e   f   g   h"
         return output_str
 
+# TEST SPACE --- 
 
-b = Board()
+b = Board(None)
 
 print(b)
