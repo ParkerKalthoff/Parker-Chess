@@ -1,8 +1,12 @@
 from moves import *
 from piece import Piece
 
+
+
 class Pawn(Piece):
 
+    def promote(self, board):
+        return 0
 
     def __init__(self, color):
         super().__init__(color)

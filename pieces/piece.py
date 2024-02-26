@@ -7,4 +7,4 @@ class Piece():
         return self.color
 
     def move():
-        return None
+        raise NotImplemented

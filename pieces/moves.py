@@ -1,6 +1,7 @@
 import math
 
 
+
 def isValidPos(position):
     if position >= 0 and position <= 63:
         return True

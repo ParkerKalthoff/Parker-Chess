@@ -14,3 +14,4 @@ class Knight(Piece):
             return 'N' # W
         else: 
             return 'n' # B
+    
