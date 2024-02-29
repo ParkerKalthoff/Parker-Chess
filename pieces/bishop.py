@@ -15,10 +15,8 @@ class Bishop(Piece):
         else: 
             return 'b' # B
 
-    def __getPotentialMoves__(self, position):
-
-        if isValidPos(position) == False:
-            raise Exception(f"[{self.type}] Position Invalid : {position}")
+    def getMoves(self, position, board):
+        return diagonals(position, board)
 
         
 

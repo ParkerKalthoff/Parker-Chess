@@ -15,9 +15,8 @@ class Queen(Piece):
         else: 
             return 'q' # B
 
-    def __getPotentialMoves__(self, position, board):
-
-        moveSet = diagonals(position, board) + straight(position, board)
+    def getMoves(self, position, board):
+        return diagonals(self, position, board) + straight(self, position, board)
 
        
 

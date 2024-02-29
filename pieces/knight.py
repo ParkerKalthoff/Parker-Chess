@@ -15,3 +15,5 @@ class Knight(Piece):
         else: 
             return 'n' # B
     
+    def getMoves(self, position, board):
+        return knightMoves(position, board)
