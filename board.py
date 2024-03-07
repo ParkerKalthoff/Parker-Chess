@@ -87,8 +87,8 @@ class Board:
     def blackScore(self):
         return self.__blackScore__
 
-    def getBoard(self):
-        return self.__myBoard__
+    def getScore(self):
+        return self.whiteScore() - self.blackScore()
 
     def refreshBoard(self):
         self.__whitePieces__ = []
@@ -133,12 +133,13 @@ class Board:
             output_str += "    a   b   c   d   e   f   g   h"
         return output_str
 
-    def withCoords(self):
+    def addCoords(self):
         return self.__str__(True)
-
+    
 # TEST SPACE --- 
 
 b = Board()
 
 print(b.withCoords())
 
+print()

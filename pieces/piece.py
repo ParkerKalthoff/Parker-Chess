@@ -6,5 +6,5 @@ class Piece():
     def getColor(self):
         return self.color
 
-    def move():
+    def getMoves():
         raise NotImplemented

@@ -18,7 +18,7 @@ class King(Piece):
         else: 
             return 'k' # B
 
-    def __getPotentialMoves__(position, board):
+    def getMoves(position, board):
         
         moveSet = squareMoves(position, board)
 
