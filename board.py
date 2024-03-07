@@ -24,6 +24,7 @@ class Board:
         self.__blackPieces__ = []
         self.__whiteScore__ = 0
         self.__blackScore__ = 0
+
         self.PIECE_VALUES = {
             Queen: 9,
             Rook: 5,
@@ -33,8 +34,10 @@ class Board:
             King: 0
         }
         self.isWhitesTurn = True
+
         if fenString == None:
             self.setBoardDefault()
+
         self.refreshBoard()
 
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
@@ -84,6 +87,9 @@ class Board:
     def blackScore(self):
         return self.__blackScore__
 
+    def getBoard(self):
+        return self.__myBoard__
+
     def refreshBoard(self):
         self.__whitePieces__ = []
         self.__blackPieces__ = []
@@ -99,6 +105,10 @@ class Board:
                     self.__blackPieces__.append(index)
                     self.__blackScore__ += self.PIECE_VALUES[type(indexValue)]
 
+    def moves(self, position):
+        if self.getBoard()[position] == None:
+            return []
+        return self.getBoard()[position].__getPotentialMoves__(self.getBoard()[position], position, self)
 
 # --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- --- 
 
@@ -123,8 +133,12 @@ class Board:
             output_str += "    a   b   c   d   e   f   g   h"
         return output_str
 
+    def withCoords(self):
+        return self.__str__(True)
+
 # TEST SPACE --- 
 
-b = Board(None)
+b = Board()
 
-print(b)
+print(b.withCoords())
+
