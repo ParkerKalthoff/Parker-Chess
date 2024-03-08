@@ -105,11 +105,16 @@ class Board:
                     self.__blackPieces__.append(index)
                     self.__blackScore__ += self.PIECE_VALUES[type(indexValue)]
 
+    def getBoard(self):
+        return self.__myBoard__
+
     def moves(self, position):
         if self.getBoard()[position] == None:
             return []
-        return self.getBoard()[position].__getPotentialMoves__(self.getBoard()[position], position, self)
+        return self.getBoard()[position].getMoves(position, self)
 
+    def getSquare(self, position):
+        return self.getBoard()[position]
 # --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- --- 
 
     def __str__(self, withChessCoords=False):
@@ -140,6 +145,4 @@ class Board:
 
 b = Board()
 
-print(b.withCoords())
-
-print()
+print(b)

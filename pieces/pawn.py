@@ -13,9 +13,17 @@ class Pawn(Piece):
         self.type = "Pawn"
         self.__canEnpassant__ = True
 
+    def canEnpassant(self):
+        return self.__canEnpassant__
     
     def __str__(self):
-        if super().getColor() == "White": 
+        if self.getColor() == "White": 
             return 'P' # W
         else: 
             return 'p' # B
+        
+    def getMoves(self, position, board):
+        moveset = pawnMove(self, position, board)
+        self.__canEnpassant__ = False
+        return moveset
+        

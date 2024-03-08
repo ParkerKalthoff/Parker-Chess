@@ -1,11 +1,5 @@
 import math
 
-# system path is annoying
-
-
-
-# system path is annoying
-
 def isValidPos(position):
     if position >= 0 and position <= 63:
         return True
@@ -35,6 +29,50 @@ def getTeams(piece, board):
 # -----  -----  -----  -----  -----  -----  ----- 
 #   Moves Moves Moves Moves Moves Moves Moves
 # -----  -----  -----  -----  -----  -----  ----- 
+
+def pawnMove(piece, position, board):
+    if not isValidPos(position):
+        raise IndexError
+    return pawnForward(piece, position, board) + enpassant(piece, position, board) + pawnTake(piece, position, board)
+
+def enpassant(piece, position, board):
+    if not piece.canEnpassant():
+        return []
+    
+    direction = 1
+    if piece.getColor() == "Black":
+        direction = -1
+    endSquare = position + (16 * direction)
+    firstSquare = position + (8 * direction)
+
+    if not isValidPos(endSquare):
+        return []
+    if board.getSquare(firstSquare) is not None or board.getSquare(endSquare) is not None:
+        return []
+
+    return [endSquare]
+
+def pawnForward(piece, position, board):
+    if not piece.canEnpassant():
+        return []
+    
+    direction = 1
+    if piece.getColor() == "Black":
+        direction = -1
+    firstSquare = position + (8 * direction)
+
+    if not isValidPos(firstSquare):
+        return []
+    if board.getSquare(firstSquare) is not None:
+        return []
+
+    return [firstSquare]
+
+
+def pawnTake(piece, position, board):
+    return []
+
+# -- -- -- -- -- -- -- -- -- --
 
 def straight(piece, position, board):
     result = []
