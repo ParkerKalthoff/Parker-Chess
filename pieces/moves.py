@@ -49,7 +49,6 @@ def enpassant(piece, position, board):
         return []
     if board.getSquare(firstSquare) is not None or board.getSquare(endSquare) is not None:
         return []
-
     return [endSquare]
 
 def pawnForward(piece, position, board):
@@ -65,9 +64,7 @@ def pawnForward(piece, position, board):
         return []
     if board.getSquare(firstSquare) is not None:
         return []
-
     return [firstSquare]
-
 
 def pawnTake(piece, position, board):
     return []

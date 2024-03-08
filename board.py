@@ -13,6 +13,7 @@ import sys
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 
+class BoardSizeError(Exception): ...
 
 class Board:
 
@@ -37,7 +38,6 @@ class Board:
 
         if fenString == None:
             self.setBoardDefault()
-
         self.refreshBoard()
 
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
@@ -91,6 +91,9 @@ class Board:
         return self.whiteScore() - self.blackScore()
 
     def refreshBoard(self):
+        if len(self.getBoard()) > 64:
+            raise BoardSizeError("Board size exceeds 64")
+
         self.__whitePieces__ = []
         self.__blackPieces__ = []
         self.__whiteScore__ = 0
@@ -115,6 +118,7 @@ class Board:
 
     def getSquare(self, position):
         return self.getBoard()[position]
+    
 # --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- --- 
 
     def __str__(self, withChessCoords=False):
