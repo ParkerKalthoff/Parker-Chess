@@ -90,6 +90,9 @@ class Board:
     def getScore(self):
         return self.whiteScore() - self.blackScore()
 
+    def getTurn(self):
+        return self.isWhitesTurn
+
     def refreshBoard(self):
         if len(self.getBoard()) > 64:
             raise BoardSizeError("Board size exceeds 64")
@@ -111,7 +114,7 @@ class Board:
     def getBoard(self):
         return self.__myBoard__
 
-    def moves(self, position):
+    def pieceMoves(self, position):
         if self.getBoard()[position] == None:
             return []
         return self.getBoard()[position].getMoves(position, self)
@@ -143,10 +146,13 @@ class Board:
         return output_str
 
     def addCoords(self):
-        return self.__str__(True)
+        return self.__str__(withChessCoords=True)
     
-# TEST SPACE --- 
-
-b = Board()
-
-print(b)
+    def stats(self):
+        if self.getTurn():
+            turn = "White"
+        else:
+            turn = "Black"
+        print(f"Turn : {turn}")
+        print(f"Score : {self.getScore()}")
+    
