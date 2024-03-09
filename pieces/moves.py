@@ -33,7 +33,9 @@ def getTeams(piece, board):
 def pawnMove(piece, position, board):
     if not isValidPos(position):
         raise IndexError
-    return pawnForward(piece, position, board) + enpassant(piece, position, board) + pawnTake(piece, position, board)
+    moveset = pawnForward(piece, position, board) + enpassant(piece, position, board) + pawnTake(piece, position, board)
+    moveset.sort()
+    return moveset
 
 def enpassant(piece, position, board):
     if not piece.canEnpassant():
@@ -67,7 +69,27 @@ def pawnForward(piece, position, board):
     return [firstSquare]
 
 def pawnTake(piece, position, board):
-    return []
+    direction = 1
+    if piece.getColor() == "Black":
+        direction = -1
+    rightSquare = position + (7 * direction)
+    leftSquare = position + (9 * direction)
+
+    moveset = []
+
+    if isValidPos(rightSquare):
+        targetPiece = board.getSquare(rightSquare)
+        # Checks if there is a target piece, checks the target square for board wrapping, 
+        #   then checks that the piece colors are different
+        if targetPiece and rightSquare % 8 == position % 8 + 1 and piece.getColor() != targetPiece.getColor():
+                moveset.append(rightSquare)
+
+    if isValidPos(leftSquare):
+        targetPiece = board.getSquare(leftSquare)
+        if targetPiece and piece.getColor() == targetPiece.getColor() and leftSquare % 8 == position % 8 - 1:
+                moveset.append(leftSquare)
+    
+    return moveset
 
 # -- -- -- -- -- -- -- -- -- --
 
@@ -291,7 +313,7 @@ def knightMoves(piece, position, board):
 
     for offset in offsets:
         pos = position + offset
-        if  isValidPos(pos):
+        if isValidPos(pos):
             if (pos % 8) in range((position % 8) - 2, (position % 8) + 3) and (pos not in friendlyPieces):
                 potentialMoves.append(position + offset)
     return potentialMoves
