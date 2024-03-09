@@ -21,8 +21,12 @@ class Board:
     def __init__(self, fenString=None):
         self.__myBoard__ = [None]*64
 
-        self.__whitePieces__ = []
-        self.__blackPieces__ = []
+        self.__whitePieceIndicies__ = []
+        self.__blackPieceIndicies__ = []
+        
+        self.__whitePieceObjects__ = []
+        self.__blackPieceObjects__ = []
+
         self.__whiteScore__ = 0
         self.__blackScore__ = 0
 
@@ -75,11 +79,11 @@ class Board:
     def nextTurn(self):
         self.isWhitesTurn = not self.isWhitesTurn
 
-    def whitePieces(self):
-        return self.__whitePieces__
+    def whitePieceIndcies(self):
+        return self.__whitePieceIndicies__
     
-    def blackPieces(self):
-        return self.__blackPieces__
+    def blackPieceIndcies(self):
+        return self.__blackPieceIndicies__
 
     def whiteScore(self):
         return self.__whiteScore__
@@ -97,19 +101,24 @@ class Board:
         if len(self.getBoard()) > 64:
             raise BoardSizeError("Board size exceeds 64")
 
-        self.__whitePieces__ = []
-        self.__blackPieces__ = []
+        self.__whitePieceIndicies__ = []
+        self.__blackPieceIndicies__ = []
+        self.__whitePieceObjects__ = []
+        self.__blackPieceObjects__ = []
         self.__whiteScore__ = 0
         self.__blackScore__ = 0
 
         for index, indexValue in enumerate(self.__myBoard__):
             if indexValue is not None:
                 if Piece.getColor(indexValue) == "White":
-                    self.__whitePieces__.append(index)
+                    self.__whitePieceIndicies__.append(index)
                     self.__whiteScore__ += self.PIECE_VALUES[type(indexValue)]
+                    self.__whitePieceObjects__.append({"Piece": indexValue, "Index": index, "Color": "White"})
                 else:
-                    self.__blackPieces__.append(index)
+                    self.__blackPieceIndicies__.append(index)
                     self.__blackScore__ += self.PIECE_VALUES[type(indexValue)]
+                    self.__blackPieceObjects__.append({"Piece": indexValue, "Index": index, "Color": "Black"})
+        
 
     def getBoard(self):
         return self.__myBoard__
@@ -121,6 +130,15 @@ class Board:
 
     def getSquare(self, position):
         return self.getBoard()[position]
+    
+    def whitePieceObjects(self):
+        return self.__whitePieceObjects__
+
+    def blackPieceObjects(self):
+        return self.__blackPieceObjects__
+
+    def pieceObjects(self):
+        return self.whitePieceObjects() + self.blackPieceObjects()
     
 # --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- --- 
 
@@ -153,6 +171,5 @@ class Board:
             turn = "White"
         else:
             turn = "Black"
-        print(f"Turn : {turn}")
-        print(f"Score : {self.getScore()}")
+        return {"Turn": turn, "Score": self.getScore}
     

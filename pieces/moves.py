@@ -19,11 +19,11 @@ def xy_Pos(position):
 def getTeams(piece, board):
     
     if piece.getColor() == "White":
-        friendlyPieces = board.whitePieces()
-        enemyPieces = board.blackPieces()
+        friendlyPieces = board.whitePieceIndcies()
+        enemyPieces = board.blackPieceIndcies()
     else:
-        friendlyPieces = board.blackPieces()
-        enemyPieces = board.whitePieces()
+        friendlyPieces = board.blackPieceIndcies()
+        enemyPieces = board.whitePieceIndcies()
 
     return friendlyPieces, enemyPieces
 # -----  -----  -----  -----  -----  -----  ----- 
