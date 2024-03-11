@@ -113,11 +113,11 @@ class Board:
                 if Piece.getColor(indexValue) == "White":
                     self.__whitePieceIndicies__.append(index)
                     self.__whiteScore__ += self.PIECE_VALUES[type(indexValue)]
-                    self.__whitePieceObjects__.append({"Piece": indexValue, "Index": index, "Color": "White"})
+                    self.__whitePieceObjects__.append({"Piece": indexValue, "Position": index, "Color": "White"})
                 else:
                     self.__blackPieceIndicies__.append(index)
                     self.__blackScore__ += self.PIECE_VALUES[type(indexValue)]
-                    self.__blackPieceObjects__.append({"Piece": indexValue, "Index": index, "Color": "Black"})
+                    self.__blackPieceObjects__.append({"Piece": indexValue, "Position": index, "Color": "Black"})
         
 
     def getBoard(self):
