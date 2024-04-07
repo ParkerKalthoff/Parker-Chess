@@ -173,3 +173,7 @@ class Board:
             turn = "Black"
         return {"Turn": turn, "Score": self.getScore}
     
+
+b = Board()
+
+print(b.pieceObjects())
