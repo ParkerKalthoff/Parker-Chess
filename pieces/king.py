@@ -1,16 +1,16 @@
 from moves import *
-from piece import Piece
+from pieces.abstractPiece import Piece
 
 
 
 class King(Piece):
 
 
-    def __init__(self, color):
+    def __init__(self, color, castleQueenSide, castleKingSide):
         super().__init__(color)
         self.type = "King"
-        self.__canCastle__ = True
-
+        self.__castleQueenSide__ = castleQueenSide
+        self.__castleKingSide__ = castleKingSide
     
     def __str__(self):
         if super().getColor() == "White": 

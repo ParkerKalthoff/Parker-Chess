@@ -1,5 +1,5 @@
 from moves import *
-from piece import Piece
+from pieces.abstractPiece import Piece
 
 class Queen(Piece):
 

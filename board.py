@@ -1,5 +1,4 @@
-
-from pieces.piece import *
+from pieces.abstractPiece import *
 from pieces.moves import *
 from pieces.queen import Queen
 from pieces.king import King
@@ -9,6 +8,7 @@ from pieces.rook import Rook
 from pieces.pawn import Pawn
 import os
 import sys
+import boardFactory
 
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
@@ -18,14 +18,23 @@ class BoardSizeError(Exception): ...
 class Board:
 
 # fix import issues
-    def __init__(self, fenString=None):
-        self.__myBoard__ = [None]*64
+    def __init__(self, boardSpace : list, isWhitesTurn : bool, castlingRights : list, enPassantSq : int, halfMoveClock : int, fullMoveNumber : int):
+        self.__myBoard__ = boardSpace
+
+        self.halfMoveClock = halfMoveClock
+        self.fullMoveNumber = fullMoveNumber
+        self.castling = castlingRights
+        
+        self.isWhitesTurn = isWhitesTurn
 
         self.__whitePieceIndicies__ = []
         self.__blackPieceIndicies__ = []
         
         self.__whitePieceObjects__ = []
         self.__blackPieceObjects__ = []
+
+        self.__whitePieceVison__ = []
+        self.__blackPieceVison__ = []
 
         self.__whiteScore__ = 0
         self.__blackScore__ = 0
@@ -36,65 +45,61 @@ class Board:
             Bishop: 3,
             Knight: 3,
             Pawn: 1,
-            King: 0
+            King: 999
         }
-        self.isWhitesTurn = True
-
-        if fenString == None:
-            self.setBoardDefault()
         self.refreshBoard()
 
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
 
     def setBoardDefault(self):
         # White Back Rank, capital letters
-        self.__myBoard__[0] = Rook("White")
-        self.__myBoard__[1] = Knight("White")
-        self.__myBoard__[2] = Bishop("White")
-        self.__myBoard__[3] = King("White")
-        self.__myBoard__[4] = Queen("White")
-        self.__myBoard__[5] = Bishop("White")
-        self.__myBoard__[6] = Knight("White")
-        self.__myBoard__[7] = Rook("White")
+        self.__myBoard__[0] = Rook("Black")
+        self.__myBoard__[1] = Knight("Black")
+        self.__myBoard__[2] = Bishop("Black")
+        self.__myBoard__[3] = King("Black")
+        self.__myBoard__[4] = Queen("Black")
+        self.__myBoard__[5] = Bishop("Black")
+        self.__myBoard__[6] = Knight("Black")
+        self.__myBoard__[7] = Rook("Black")
 
         # White Pawns
         for index in range(8,16):
-            self.__myBoard__[index] = Pawn("White")
+            self.__myBoard__[index] = Pawn("Black")
 
         # Black Back Rank, lowercase letters
             
-        self.__myBoard__[56] =  Rook("Black")
-        self.__myBoard__[57] =  Knight("Black")
-        self.__myBoard__[58] =  Bishop("Black")
-        self.__myBoard__[59] =  King("Black")
-        self.__myBoard__[60] =  Queen("Black")
-        self.__myBoard__[61] =  Bishop("Black")
-        self.__myBoard__[62] =  Knight("Black")
-        self.__myBoard__[63] =  Rook("Black")
+        self.__myBoard__[56] =  Rook("White")
+        self.__myBoard__[57] =  Knight("White")
+        self.__myBoard__[58] =  Bishop("White")
+        self.__myBoard__[59] =  King("White")
+        self.__myBoard__[60] =  Queen("White")
+        self.__myBoard__[61] =  Bishop("White")
+        self.__myBoard__[62] =  Knight("White")
+        self.__myBoard__[63] =  Rook("White")
 
         # Black Pawns
         for index in range(48,56):
-            self.__myBoard__[index] = Pawn("Black")
+            self.__myBoard__[index] = Pawn("White")
 
-    def nextTurn(self):
+    def nextTurn(self) -> None:
         self.isWhitesTurn = not self.isWhitesTurn
 
-    def whitePieceIndcies(self):
+    def whitePieceIndcies(self) -> list[int]:
         return self.__whitePieceIndicies__
     
-    def blackPieceIndcies(self):
+    def blackPieceIndcies(self) -> list[int]:
         return self.__blackPieceIndicies__
 
-    def whiteScore(self):
+    def whiteScore(self) -> int: ## meant for engine usage, king is 999
         return self.__whiteScore__
     
-    def blackScore(self):
+    def blackScore(self) -> int:
         return self.__blackScore__
 
-    def getScore(self):
+    def getScore(self) -> int:
         return self.whiteScore() - self.blackScore()
 
-    def getTurn(self):
+    def getTurn(self) -> bool:
         return self.isWhitesTurn
 
     def refreshBoard(self):
@@ -120,29 +125,29 @@ class Board:
                     self.__blackPieceObjects__.append({"Piece": indexValue, "Position": index, "Color": "Black"})
         
 
-    def getBoard(self):
+    def getBoard(self) -> list[Piece]:
         return self.__myBoard__
 
-    def pieceMoves(self, position):
+    def pieceMoves(self, position: int) -> list[int]:
         if self.getBoard()[position] == None:
             return []
         return self.getBoard()[position].getMoves(position, self)
 
-    def getSquare(self, position):
+    def getSquare(self, position: int) -> Piece:
         return self.getBoard()[position]
     
-    def whitePieceObjects(self):
+    def whitePieceObjects(self) -> list[Piece]:
         return self.__whitePieceObjects__
 
-    def blackPieceObjects(self):
+    def blackPieceObjects(self) -> list[Piece]:
         return self.__blackPieceObjects__
 
-    def pieceObjects(self):
+    def pieceObjects(self) -> list[Piece]:
         return self.whitePieceObjects() + self.blackPieceObjects()
     
 # --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- --- 
 
-    def __str__(self, withChessCoords=False):
+    def __str__(self, withChessCoords=False) -> str:
         columnNum = ['1','2','3','4','5','6','7','8']
         output_str = " _______________________________\n"
         if withChessCoords:
@@ -163,17 +168,6 @@ class Board:
             output_str += "    a   b   c   d   e   f   g   h"
         return output_str
 
-    def addCoords(self):
+    def addCoords(self) -> str:
         return self.__str__(withChessCoords=True)
     
-    def stats(self):
-        if self.getTurn():
-            turn = "White"
-        else:
-            turn = "Black"
-        return {"Turn": turn, "Score": self.getScore}
-    
-
-b = Board()
-
-print(b.pieceObjects())
