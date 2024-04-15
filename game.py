@@ -1,6 +1,8 @@
 from board import Board
 import pygame, sys, os, math
 
+# wip
+
 # Initialize Pygame
 pygame.init()
 

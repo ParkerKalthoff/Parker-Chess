@@ -1,4 +1,4 @@
-from pieces.abstractPiece import *
+from pieces.abstractPiece import Piece
 from pieces.moves import *
 from pieces.queen import Queen
 from pieces.king import King
@@ -8,22 +8,21 @@ from pieces.rook import Rook
 from pieces.pawn import Pawn
 import os
 import sys
-import boardFactory
+from boardFactory import fenToBoard, defaultBoard
 
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 
-class BoardSizeError(Exception): ...
+class BoardSizeError(Exception): ... # custom exception >:D
 
 class Board:
-
-# fix import issues
-    def __init__(self, boardSpace : list, isWhitesTurn : bool, castlingRights : list, enPassantSq : int, halfMoveClock : int, fullMoveNumber : int):
+    def __init__(self, boardSpace : list, isWhitesTurn : bool, castlingRights : list, enpassantSq : int, halfMoveClock : int, fullMoveNumber : int):
         self.__myBoard__ = boardSpace
 
         self.halfMoveClock = halfMoveClock
         self.fullMoveNumber = fullMoveNumber
         self.castling = castlingRights
+        self.enpassantSquare = enpassantSq
         
         self.isWhitesTurn = isWhitesTurn
 
@@ -50,36 +49,6 @@ class Board:
         self.refreshBoard()
 
 # -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-
-    def setBoardDefault(self):
-        # White Back Rank, capital letters
-        self.__myBoard__[0] = Rook("Black")
-        self.__myBoard__[1] = Knight("Black")
-        self.__myBoard__[2] = Bishop("Black")
-        self.__myBoard__[3] = King("Black")
-        self.__myBoard__[4] = Queen("Black")
-        self.__myBoard__[5] = Bishop("Black")
-        self.__myBoard__[6] = Knight("Black")
-        self.__myBoard__[7] = Rook("Black")
-
-        # White Pawns
-        for index in range(8,16):
-            self.__myBoard__[index] = Pawn("Black")
-
-        # Black Back Rank, lowercase letters
-            
-        self.__myBoard__[56] =  Rook("White")
-        self.__myBoard__[57] =  Knight("White")
-        self.__myBoard__[58] =  Bishop("White")
-        self.__myBoard__[59] =  King("White")
-        self.__myBoard__[60] =  Queen("White")
-        self.__myBoard__[61] =  Bishop("White")
-        self.__myBoard__[62] =  Knight("White")
-        self.__myBoard__[63] =  Rook("White")
-
-        # Black Pawns
-        for index in range(48,56):
-            self.__myBoard__[index] = Pawn("White")
 
     def nextTurn(self) -> None:
         self.isWhitesTurn = not self.isWhitesTurn
@@ -170,4 +139,9 @@ class Board:
 
     def addCoords(self) -> str:
         return self.__str__(withChessCoords=True)
+    
+
+myBoard = defaultBoard()
+
+print(myBoard)
     

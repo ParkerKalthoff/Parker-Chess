@@ -1,7 +1,10 @@
-from pieces import pawn, bishop, knight, rook, queen, king
+from pieces import pawn, bishop, knight, rook, queen, king, abstractPiece
 from board import Board
 
-def fenToBoard(fenString : str):
+def defaultBoard() -> Board:
+    return fenToBoard('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+
+def fenToBoard(fenString : str) -> Board:
     # boardSpace : list, isWhitesTurn : bool, castlingRights : list, enPassantSq : int, halfMoveClock : int, fullMoveNumber : int
     temp = fenString.split() 
     boardSpace = []
@@ -21,7 +24,7 @@ def fenToBoard(fenString : str):
     return Board(boardSpace, isWhitesTurn, castlingRights, enpassant, halfMoveClock, fullMoveNumber)
 
 
-def coordinateToIndex(coord : str):
+def coordinateToIndex(coord : str) -> int:
     index = 0
     letter = coord[0]
 
@@ -43,7 +46,7 @@ def coordinateToIndex(coord : str):
     return index
 
 
-def castlingList(string : str):
+def castlingList(string : str) -> list[bool]:
     wk = 'K' in string
     wq = 'Q' in string
     bk = 'k' in string
@@ -51,7 +54,7 @@ def castlingList(string : str):
 
     return [wk, wq, bk, bq]
 
-def charToPiece(char : str):
+def charToPiece(char : str) -> abstractPiece.Piece | None:
     
     if char in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
         boardSpace = [None] * int(char)
@@ -65,12 +68,12 @@ def charToPiece(char : str):
     char = char.capitalize()
 
     switch = {
-        'P': pawn(color),
-        'B': bishop(color),
-        'R': rook(color),
-        'N': knight(color),
-        'Q': queen(color),
-        'K': king(color)
+        'P': pawn.Pawn(color),
+        'B': bishop.Bishop(color),
+        'R': rook.Rook(color),
+        'N': knight.Knight(color),
+        'Q': queen.Queen(color),
+        'K': king.King(color)
     }
 
     return [switch[char]]
