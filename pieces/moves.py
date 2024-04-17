@@ -1,22 +1,31 @@
 import math
+from pieces.abstractPiece import *
+from pieces.moves import *
+from pieces.queen import Queen
+from pieces.king import King
+from pieces.bishop import Bishop
+from pieces.knight import Knight
+from pieces.rook import Rook
+from pieces.pawn import Pawn
+from board import Board
 
-def isValidPos(position):
+def isValidPos(position: int) -> bool:
     if position >= 0 and position <= 63:
         return True
     return False
 
-def x_Pos(position):
+def x_Pos(position : int) -> int:
     return position % 8
 
-def y_Pos(position):
+def y_Pos(position : int) -> int:
     return math.floor(position/8)
 
-def xy_Pos(position):
+def xy_Pos(position : int) -> tuple[int, int]:
     x = x_Pos(position)
     y = y_Pos(position)
     return x, y
 
-def getTeams(piece, board):
+def getTeams(piece : Piece, board : Board) -> tuple[list[Piece], list[Piece]]:
     
     if piece.getColor() == "White":
         friendlyPieces = board.whitePieceIndcies()
@@ -30,14 +39,14 @@ def getTeams(piece, board):
 #   Moves Moves Moves Moves Moves Moves Moves
 # -----  -----  -----  -----  -----  -----  ----- 
 
-def pawnMove(piece, position, board):
+def pawnMove(piece : Pawn, position : int, board : list[Piece]) -> list[int]:
     if not isValidPos(position):
         raise IndexError
     moveset = pawnForward(piece, position, board) + enpassant(piece, position, board) + pawnTake(piece, position, board)
     moveset.sort()
     return moveset
 
-def enpassant(piece, position, board):
+def enpassant(piece : Pawn, position : int, board : Board) -> list[int]:
     if not piece.canEnpassant():
         return []
     
@@ -53,7 +62,7 @@ def enpassant(piece, position, board):
         return []
     return [endSquare]
 
-def pawnForward(piece, position, board):
+def pawnForward(piece : Pawn, position : int, board : Board) -> list[int]:
     if not piece.canEnpassant():
         return []
     
@@ -68,7 +77,7 @@ def pawnForward(piece, position, board):
         return []
     return [firstSquare]
 
-def pawnTake(piece, position, board):
+def pawnTake(piece : Pawn, position : int, board : Board) -> list[int]:
     direction = 1
     if piece.getColor() == "Black":
         direction = -1
@@ -93,7 +102,7 @@ def pawnTake(piece, position, board):
 
 # -- -- -- -- -- -- -- -- -- --
 
-def straight(piece, position, board):
+def straight(piece : Rook | Queen, position : int, board : Board) -> list[int]:
     result = []
 
     if not isValidPos(position):
@@ -170,7 +179,7 @@ def straight(piece, position, board):
 
 # -------- --------  -------- --------  -------- -------- 
  
-def diagonals(piece, position, board):
+def diagonals(piece : Bishop | Queen, position : int, board : Board) -> list[int]:
 
     if not isValidPos(position):
         raise IndexError
@@ -181,6 +190,7 @@ def diagonals(piece, position, board):
 
     # Top left
     overflow = []
+    targetPieceFound = False
 
     for index in range(max(x,y)):
         mySquare = position + (-9 * (index + 1))
@@ -195,9 +205,10 @@ def diagonals(piece, position, board):
         if mySquare in friendlyPieces:
             break
 
-        if mySquare in enemyPieces:
+        if mySquare in enemyPieces and not targetPieceFound:
             potentialMoves.append(mySquare)
-            break
+            targetPieceFound = True
+            
 
         overflow.append(x_Pos(mySquare))
         potentialMoves.append(mySquare)
@@ -279,11 +290,12 @@ def diagonals(piece, position, board):
         if index not in results:
             results.append(index)
     results.sort()
+
     return results
 
 # -------- --------  -------- --------  -------- -------- 
 
-def squareMoves(piece, position, board):
+def squareMoves(piece : King, position : int, board : Board) -> list[int]:
     if not isValidPos(position):
         raise IndexError
 
@@ -300,7 +312,7 @@ def squareMoves(piece, position, board):
 
 # -------- --------  -------- --------  -------- -------- 
 
-def knightMoves(piece, position, board):
+def knightMoves(piece : Knight, position : int, board : Board) -> list[int]:
 
     if not isValidPos(position):
         raise IndexError
