@@ -9,6 +9,7 @@ class King(Piece):
     def __init__(self, color, castleQueenSide, castleKingSide):
         super().__init__(color)
         self.type = "King"
+        self.inCheck = False
         self.__castleQueenSide__ = castleQueenSide
         self.__castleKingSide__ = castleKingSide
     
