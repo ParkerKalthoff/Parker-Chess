@@ -205,17 +205,22 @@ def diagonals(piece : Bishop | Queen, position : int, board : Board) -> list[int
         if mySquare in friendlyPieces:
             break
 
-        if mySquare in enemyPieces and not targetPieceFound:
+        if not targetPieceFound and mySquare in enemyPieces :
             potentialMoves.append(mySquare)
             targetPieceFound = True
-            
+            potential_pinned_piece = mySquare
+
+        if targetPieceFound:
+            if  isinstance(board.getBoard()[mySquare], King) and board.getBoard()[mySquare].getColor() != piece.getColor():
+                board.getBoard()[potential_pinned_piece].pin()
 
         overflow.append(x_Pos(mySquare))
         potentialMoves.append(mySquare)
 
         
     # Top Right
-    overflow = []
+    overflow = [] # clear overflow
+    targetPieceFound = False
 
     for index in range(max(7-x,y)):
         mySquare = position + (-7 * (index + 1))
@@ -234,11 +239,21 @@ def diagonals(piece : Bishop | Queen, position : int, board : Board) -> list[int
             potentialMoves.append(mySquare)
             break
 
+        if not targetPieceFound and mySquare in enemyPieces :
+            potentialMoves.append(mySquare)
+            targetPieceFound = True
+            potential_pinned_piece = mySquare
+
+        if targetPieceFound:
+            if  isinstance(board.getBoard()[mySquare], King) and board.getBoard()[mySquare].getColor() != piece.getColor():
+                board.getBoard()[potential_pinned_piece].pin()
+
         overflow.append(x_Pos(mySquare))
         potentialMoves.append(mySquare)
 
     # Bottom left
     overflow = []
+    targetPieceFound = False
 
     for index in range(max(x,7-y)):
         mySquare = position + (7 * (index + 1))
@@ -257,12 +272,22 @@ def diagonals(piece : Bishop | Queen, position : int, board : Board) -> list[int
             potentialMoves.append(mySquare)
             break
 
+        if not targetPieceFound and mySquare in enemyPieces :
+            potentialMoves.append(mySquare)
+            targetPieceFound = True
+            potential_pinned_piece = mySquare
+
+        if targetPieceFound:
+            if  isinstance(board.getBoard()[mySquare], King) and board.getBoard()[mySquare].getColor() != piece.getColor():
+                board.getBoard()[potential_pinned_piece].pin()
+
         overflow.append(x_Pos(mySquare))
         potentialMoves.append(mySquare)
 
         
     # Bottom Right
     overflow = []
+    targetPieceFound = False
 
     for index in range(max(7-x,7-y)):
         mySquare = position + (9 * (index + 1))
@@ -280,6 +305,15 @@ def diagonals(piece : Bishop | Queen, position : int, board : Board) -> list[int
         if mySquare in enemyPieces:
             potentialMoves.append(mySquare)
             break
+
+        if not targetPieceFound and mySquare in enemyPieces :
+            potentialMoves.append(mySquare)
+            targetPieceFound = True
+            potential_pinned_piece = mySquare
+
+        if targetPieceFound:
+            if  isinstance(board.getBoard()[mySquare], King) and board.getBoard()[mySquare].getColor() != piece.getColor():
+                board.getBoard()[potential_pinned_piece].pin()
 
         overflow.append(x_Pos(mySquare))
         potentialMoves.append(mySquare)
