@@ -1,3 +1,5 @@
+import os
+import sys
 from pieces.abstractPiece import Piece
 from pieces.moves import *
 from pieces.queen import Queen
@@ -6,37 +8,31 @@ from pieces.bishop import Bishop
 from pieces.knight import Knight
 from pieces.rook import Rook
 from pieces.pawn import Pawn
-import os
-import sys
 from boardFactory import fenToBoard, defaultBoard
+from typing import List, Union, Optional
 
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 
-class BoardSizeError(Exception): ... # custom exception >:D
+class BoardSizeError(Exception):
+    """Custom exception for board size errors."""
+    pass
 
 class Board:
-    def __init__(self, boardSpace : list, isWhitesTurn : bool, castlingRights : list, enpassantSq : int, halfMoveClock : int, fullMoveNumber : int):
-        self.__myBoard__ = boardSpace
+    def __init__(self, board_space: List[Optional[Piece]], is_whites_turn: bool, castling_rights: List[bool], enpassant_sq: int, half_move_clock: int, full_move_number: int):
+        self._board_space = board_space
+        self.half_move_clock = half_move_clock
+        self.full_move_number = full_move_number
+        self.castling = castling_rights
+        self.enpassant_square = enpassant_sq
+        self.is_whites_turn = is_whites_turn
 
-        self.halfMoveClock = halfMoveClock
-        self.fullMoveNumber = fullMoveNumber
-        self.castling = castlingRights
-        self.enpassantSquare = enpassantSq
-        
-        self.isWhitesTurn = isWhitesTurn
-
-        self.__whitePieceIndicies__ = []
-        self.__blackPieceIndicies__ = []
-        
-        self.__whitePieceObjects__ = []
-        self.__blackPieceObjects__ = []
-
-        self.__whitePieceVison__ = []
-        self.__blackPieceVison__ = []
-
-        self.__whiteScore__ = 0
-        self.__blackScore__ = 0
+        self._white_piece_indices = []
+        self._black_piece_indices = []
+        self._white_piece_objects = []
+        self._black_piece_objects = []
+        self._white_score = 0
+        self._black_score = 0
 
         self.PIECE_VALUES = {
             Queen: 9,
@@ -46,102 +42,101 @@ class Board:
             Pawn: 1,
             King: 999
         }
-        self.refreshBoard()
 
-# -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+        self.refresh_board()
 
-    def nextTurn(self) -> None:
-        self.isWhitesTurn = not self.isWhitesTurn
+    def next_turn(self) -> None:
+        self.is_whites_turn = not self.is_whites_turn
 
-    def whitePieceIndcies(self) -> list[int]:
-        return self.__whitePieceIndicies__
-    
-    def blackPieceIndcies(self) -> list[int]:
-        return self.__blackPieceIndicies__
+    def white_piece_indices(self) -> List[int]:
+        return self._white_piece_indices
 
-    def whiteScore(self) -> int: ## meant for engine usage, king is 999
-        return self.__whiteScore__
-    
-    def blackScore(self) -> int:
-        return self.__blackScore__
+    def black_piece_indices(self) -> List[int]:
+        return self._black_piece_indices
 
-    def getScore(self) -> int:
-        return self.whiteScore() - self.blackScore()
+    def white_score(self) -> int:
+        return self._white_score
 
-    def getTurn(self) -> bool:
-        return self.isWhitesTurn
+    def black_score(self) -> int:
+        return self._black_score
 
-    def refreshBoard(self):
-        if len(self.getBoard()) > 64:
-            raise BoardSizeError("Board size exceeds 64")
+    def get_score(self) -> int:
+        return self.white_score() - self.black_score()
 
-        self.__whitePieceIndicies__ = []
-        self.__blackPieceIndicies__ = []
-        self.__whitePieceObjects__ = []
-        self.__blackPieceObjects__ = []
-        self.__whiteScore__ = 0
-        self.__blackScore__ = 0
+    def get_turn(self) -> bool:
+        return self.is_whites_turn
 
-        for index, indexValue in enumerate(self.__myBoard__):
-            if indexValue is not None:
-                if Piece.getColor(indexValue) == "White":
-                    self.__whitePieceIndicies__.append(index)
-                    self.__whiteScore__ += self.PIECE_VALUES[type(indexValue)]
-                    self.__whitePieceObjects__.append({"Piece": indexValue, "Position": index, "Color": "White"})
+    def refresh_board(self):
+        if len(self.get_board()) > 64:
+            raise BoardSizeError("Board size exceeds 64 squares.")
+
+        self._white_piece_indices = []
+        self._black_piece_indices = []
+        self._white_piece_objects = []
+        self._black_piece_objects = []
+        self._white_score = 0
+        self._black_score = 0
+
+        for index, piece in enumerate(self._board_space):
+            if piece:
+                piece_color = Piece.getColor(piece)
+                if piece_color == "White":
+                    self._add_piece(index, piece, self._white_piece_indices, self._white_piece_objects, is_white=True)
                 else:
-                    self.__blackPieceIndicies__.append(index)
-                    self.__blackScore__ += self.PIECE_VALUES[type(indexValue)]
-                    self.__blackPieceObjects__.append({"Piece": indexValue, "Position": index, "Color": "Black"})
-        
+                    self._add_piece(index, piece, self._black_piece_indices, self._black_piece_objects, is_white=False)
 
-    def getBoard(self) -> list[Piece]:
-        return self.__myBoard__
 
-    def pieceMoves(self, position: int) -> list[int]:
-        if self.getBoard()[position] == None:
-            return []
-        return self.getBoard()[position].getMoves(position, self)
 
-    def getSquare(self, position: int) -> Piece:
-        return self.getBoard()[position]
-    
-    def whitePieceObjects(self) -> list[Piece]:
-        return self.__whitePieceObjects__
+    def _add_piece(self, index: int, piece: Piece, indices: List[int], objects: List[dict], is_white: bool):
+        """ >>> Private """
+        indices.append(index)
+        objects.append({"Piece": piece, "Position": index, "Color": "White" if is_white else "Black"})
+        if is_white:
+            self._white_score += self.PIECE_VALUES[type(piece)]
+        else:
+            self._black_score += self.PIECE_VALUES[type(piece)]
 
-    def blackPieceObjects(self) -> list[Piece]:
-        return self.__blackPieceObjects__
 
-    def pieceObjects(self) -> list[Piece]:
-        return self.whitePieceObjects() + self.blackPieceObjects()
-    
-# --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- ---  --- --- 
+    def get_board(self) -> List[Optional[Piece]]:
+        return self._board_space
 
-    def __str__(self, withChessCoords=False) -> str:
-        columnNum = ['1','2','3','4','5','6','7','8']
+    def piece_moves(self, position: int) -> List[int]:
+        piece = self._board_space[position]
+        return piece.getMoves(position, self) if piece else []
+
+    def get_square(self, position: int) -> Optional[Piece]:
+        return self._board_space[position]
+
+    def white_piece_objects(self) -> List[dict]:
+        return self._white_piece_objects
+
+    def black_piece_objects(self) -> List[dict]:
+        return self._black_piece_objects
+
+    def piece_objects(self) -> List[dict]:
+        return self.white_piece_objects() + self.black_piece_objects()
+
+    def __str__(self, with_chess_coords: bool = False) -> str:
+        column_num = ['1', '2', '3', '4', '5', '6', '7', '8']
         output_str = " _______________________________\n"
-        if withChessCoords:
+        if with_chess_coords:
             output_str = "  " + output_str
         for row in range(8):
-            temp = "|"
-            if withChessCoords:
-                temp = columnNum[row]+ "-" + temp
-            
-            for index in range(8):
-                if self.__myBoard__[(row*8)+index] == None:
-                    temp += "___|"
-                else:
-                    temp += f"_{self.__myBoard__[(row*8)+index].__str__()}_|"
-            temp += "\n"
-            output_str += temp
-        if withChessCoords:
+            row_str = "|"
+            if with_chess_coords:
+                row_str = column_num[row] + "-" + row_str
+            for col in range(8):
+                piece = self._board_space[row * 8 + col]
+                row_str += f"_{piece.__str__() if piece else '___'}|"
+            output_str += row_str + "\n"
+        if with_chess_coords:
             output_str += "    a   b   c   d   e   f   g   h"
         return output_str
 
-    def addCoords(self) -> str:
-        return self.__str__(withChessCoords=True)
-    
+    def add_coords(self) -> str:
+        return self.__str__(with_chess_coords=True)
 
-myBoard = defaultBoard()
-
-print(myBoard)
-    
+# Example usage
+if __name__ == "__main__":
+    my_board = defaultBoard()
+    print(my_board)
