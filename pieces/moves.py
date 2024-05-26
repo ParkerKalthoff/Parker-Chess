@@ -1,30 +1,6 @@
-import math
-from pieces.abstractPiece import Piece
-from pieces.pawn import Pawn
-from pieces.rook import Rook
-from pieces.knight import Knight
-from pieces.bishop import Bishop
-from pieces.queen import Queen
-from pieces.king import King
-from board import Board
+from util import isValidPos, x_Pos, y_Pos, xy_Pos  # Import from utils
 
-def isValidPos(position: int) -> bool:
-    """Checks if a position is valid on an 8x8 chessboard."""
-    return 0 <= position <= 63
-
-def x_Pos(position: int) -> int:
-    """Returns the x-coordinate (file) of a given position."""
-    return position % 8
-
-def y_Pos(position: int) -> int:
-    """Returns the y-coordinate (rank) of a given position."""
-    return position // 8
-
-def xy_Pos(position: int) -> tuple[int, int]:
-    """Returns the (x, y) coordinates of a given position."""
-    return x_Pos(position), y_Pos(position)
-
-def getTeams(piece: Piece, board: Board) -> tuple[list[int], list[int]]:
+def getTeams(piece, board) -> tuple[list[int], list[int]]:
     """Returns lists of friendly and enemy piece indices."""
     if piece.getColor() == "White":
         return board.whitePieceIndcies(), board.blackPieceIndcies()
@@ -32,7 +8,7 @@ def getTeams(piece: Piece, board: Board) -> tuple[list[int], list[int]]:
 
 # -----  -----  -----  -----  -----  -----  -----
 
-def pawnMove(piece: Pawn, position: int, board: Board) -> list[int]:
+def pawnMove(piece, position: int, board) -> list[int]:
     """Returns the possible moves for a pawn at a given position."""
     if not isValidPos(position):
         raise IndexError("Invalid position")
@@ -41,7 +17,7 @@ def pawnMove(piece: Pawn, position: int, board: Board) -> list[int]:
                pawnTake(piece, position, board))
     return sorted(moveset)
 
-def enpassant(piece: Pawn, position: int, board: Board) -> list[int]:
+def enpassant(piece, position: int, board) -> list[int]:
     """Returns the en passant move for a pawn if applicable."""
     if not piece.canEnpassant():
         return []
@@ -54,7 +30,7 @@ def enpassant(piece: Pawn, position: int, board: Board) -> list[int]:
         return []
     return [endSquare]
 
-def pawnForward(piece: Pawn, position: int, board: Board) -> list[int]:
+def pawnForward(piece, position: int, board) -> list[int]:
     """Returns the forward moves for a pawn."""
     if not piece.canEnpassant():
         return []
@@ -66,7 +42,7 @@ def pawnForward(piece: Pawn, position: int, board: Board) -> list[int]:
         return []
     return [firstSquare]
 
-def pawnTake(piece: Pawn, position: int, board: Board) -> list[int]:
+def pawnTake(piece, position: int, board) -> list[int]:
     """Returns the capturing moves for a pawn."""
     direction = 1 if piece.getColor() == "White" else -1
     rightSquare = position + (7 * direction)
@@ -88,7 +64,7 @@ def pawnTake(piece: Pawn, position: int, board: Board) -> list[int]:
 
 # -----  -----  -----  -----  -----  -----  -----
 
-def straight(piece: Rook | Queen, position: int, board: Board) -> list[int]:
+def straight(piece, position: int, board) -> list[int]:
     """Returns the possible straight-line moves for a rook or queen."""
     result = []
     if not isValidPos(position):
@@ -114,7 +90,7 @@ def straight(piece: Rook | Queen, position: int, board: Board) -> list[int]:
 
 # -----  -----  -----  -----  -----  -----  -----
 
-def diagonals(piece: Bishop | Queen, position: int, board: Board) -> list[int]:
+def diagonals(piece, position: int, board) -> list[int]:
     """Returns the possible diagonal moves for a bishop or queen."""
     result = []
     if not isValidPos(position):
@@ -140,7 +116,7 @@ def diagonals(piece: Bishop | Queen, position: int, board: Board) -> list[int]:
 
 # -----  -----  -----  -----  -----  -----  -----
 
-def squareMoves(piece: King, position: int, board: Board) -> list[int]:
+def squareMoves(piece, position: int, board) -> list[int]:
     """Returns the possible moves for a king."""
     if not isValidPos(position):
         raise IndexError("Invalid position")
@@ -154,7 +130,7 @@ def squareMoves(piece: King, position: int, board: Board) -> list[int]:
 
 # -----  -----  -----  -----  -----  -----  -----
 
-def knightMoves(piece: Knight, position: int, board: Board) -> list[int]:
+def knightMoves(piece, position: int, board) -> list[int]:
     """Returns the possible moves for a knight."""
     if not isValidPos(position):
         raise IndexError("Invalid position")

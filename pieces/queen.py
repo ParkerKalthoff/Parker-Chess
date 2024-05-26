@@ -1,4 +1,4 @@
-from moves import *
+from moves import diagonals, straight
 from pieces.abstractPiece import Piece
 
 class Queen(Piece):

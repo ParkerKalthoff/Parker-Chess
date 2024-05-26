@@ -1,4 +1,4 @@
-from moves import *
+from moves import squareMoves
 from pieces.abstractPiece import Piece
 
 
@@ -6,7 +6,7 @@ from pieces.abstractPiece import Piece
 class King(Piece):
 
 
-    def __init__(self, color, castleQueenSide, castleKingSide):
+    def __init__(self, color, castleQueenSide = True, castleKingSide = True):
         super().__init__(color)
         self.type = "King"
         self.inCheck = False

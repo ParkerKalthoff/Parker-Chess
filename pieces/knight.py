@@ -1,4 +1,4 @@
-from moves import *
+from moves import knightMoves
 from pieces.abstractPiece import Piece
 
 class Knight(Piece):
@@ -16,4 +16,4 @@ class Knight(Piece):
             return 'n' # B
     
     def getMoves(self, position, board):
-        return knightMoves(position, board)
+        return knightMoves(self, position, board)

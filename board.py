@@ -1,14 +1,12 @@
 import os
 import sys
 from pieces.abstractPiece import Piece
-from pieces.moves import *
 from pieces.queen import Queen
 from pieces.king import King
 from pieces.bishop import Bishop
 from pieces.knight import Knight
 from pieces.rook import Rook
 from pieces.pawn import Pawn
-from boardFactory import fenToBoard, defaultBoard
 from typing import List, Union, Optional
 
 file_dir = os.path.dirname(__file__)
@@ -127,16 +125,13 @@ class Board:
                 row_str = column_num[row] + "-" + row_str
             for col in range(8):
                 piece = self._board_space[row * 8 + col]
-                row_str += f"_{piece.__str__() if piece else '___'}|"
+                row_str += f"{'_' + piece.__str__() +'_' if piece else '___'}|"
             output_str += row_str + "\n"
         if with_chess_coords:
             output_str += "    a   b   c   d   e   f   g   h"
         return output_str
 
-    def add_coords(self) -> str:
+    def displayBoard(self) -> str:
         return self.__str__(with_chess_coords=True)
 
-# Example usage
-if __name__ == "__main__":
-    my_board = defaultBoard()
-    print(my_board)
+

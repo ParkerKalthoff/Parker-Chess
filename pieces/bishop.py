@@ -1,4 +1,4 @@
-from moves import *
+from moves import diagonals
 from pieces.abstractPiece import Piece
 
 

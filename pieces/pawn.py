@@ -1,7 +1,5 @@
-from moves import *
+from moves import pawnMove
 from pieces.abstractPiece import Piece
-
-
 
 class Pawn(Piece):
 

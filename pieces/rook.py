@@ -1,4 +1,4 @@
-from moves import *
+import moves
 from pieces.abstractPiece import Piece
 
 class Rook(Piece):
