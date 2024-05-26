@@ -1,5 +1,6 @@
 import os
 import sys
+from xmlrpc.client import Boolean
 from pieces.abstractPiece import Piece
 from pieces.queen import Queen
 from pieces.king import King
@@ -27,10 +28,18 @@ class Board:
 
         self._white_piece_indices = []
         self._black_piece_indices = []
+
         self._white_piece_objects = []
         self._black_piece_objects = []
+
+        self._white_piece_vision = []
+        self._black_piece_vision = []
+
+
         self._white_score = 0
         self._black_score = 0
+
+        self.inCheck = False
 
         self.PIECE_VALUES = {
             Queen: 9,
@@ -64,7 +73,7 @@ class Board:
     def get_turn(self) -> bool:
         return self.is_whites_turn
 
-    def refresh_board(self):
+    def refresh_board(self) -> int:
         if len(self.get_board()) > 64:
             raise BoardSizeError("Board size exceeds 64 squares.")
 
@@ -77,22 +86,12 @@ class Board:
 
         for index, piece in enumerate(self._board_space):
             if piece:
-                piece_color = Piece.getColor(piece)
-                if piece_color == "White":
-                    self._add_piece(index, piece, self._white_piece_indices, self._white_piece_objects, is_white=True)
+                if piece.getColor() == 'White':
+                    self._white_piece_indices.append(index)
+                    self._white_piece_objects.append(piece)
                 else:
-                    self._add_piece(index, piece, self._black_piece_indices, self._black_piece_objects, is_white=False)
-
-
-
-    def _add_piece(self, index: int, piece: Piece, indices: List[int], objects: List[dict], is_white: bool):
-        """ >>> Private """
-        indices.append(index)
-        objects.append({"Piece": piece, "Position": index, "Color": "White" if is_white else "Black"})
-        if is_white:
-            self._white_score += self.PIECE_VALUES[type(piece)]
-        else:
-            self._black_score += self.PIECE_VALUES[type(piece)]
+                    self._black_piece_indices.append(index)
+                    self._black_piece_objects.append(piece)
 
 
     def get_board(self) -> List[Optional[Piece]]:
