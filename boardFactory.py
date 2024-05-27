@@ -23,7 +23,7 @@ def board(fen_string: str) -> Board:
     for char in parts[0]:
         if char == '/':
             continue
-        board_space.extend(charToPiece(char))
+        board_space.append(charToPiece(char))
 
     is_whites_turn = parts[1] == 'w'
     castling_rights = parse_castling_rights(parts[2])
@@ -44,7 +44,7 @@ def validate_fen(fen: str):
     board_part = parts[0]
     ranks = board_part.split('/')
     if len(ranks) != 8:
-        raise ValueError(f"FEN string board part has {len(ranks)} ranks; exactly 8 required\n\nBoard part: {ranks}")
+        raise ValueError(f"FEN string board part has {len(ranks)} ranks; exactly 8 required\n - Board part: {ranks}")
 
     for i_rank, rank in enumerate(ranks):
         count = 0

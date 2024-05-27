@@ -97,8 +97,6 @@ class Board:
                     self._black_piece_indices.append(index)
                     self._black_piece_objects.append(piece)
                     self._black_score += self.PIECE_VALUES[type(piece)]
-        
-
 
     def get_board(self) -> List[Optional[Piece]]:
         return self._board_space
