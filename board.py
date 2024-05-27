@@ -8,7 +8,7 @@ from pieces.bishop import Bishop
 from pieces.knight import Knight
 from pieces.rook import Rook
 from pieces.pawn import Pawn
-from typing import List, Union, Optional
+from typing import List, Optional
 
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
@@ -19,6 +19,7 @@ class BoardSizeError(Exception):
 
 class Board:
     def __init__(self, board_space: List[Optional[Piece]], is_whites_turn: bool, castling_rights: List[bool], enpassant_sq: int, half_move_clock: int, full_move_number: int):
+
         self._board_space = board_space
         self.half_move_clock = half_move_clock
         self.full_move_number = full_move_number
@@ -73,7 +74,9 @@ class Board:
     def get_turn(self) -> bool:
         return self.is_whites_turn
 
-    def refresh_board(self) -> int:
+    def refresh_board(self, Override = True) -> int:
+        """ Refreshes internal board values after piece moves """
+
         if len(self.get_board()) > 64:
             raise BoardSizeError("Board size exceeds 64 squares.")
 
@@ -89,9 +92,12 @@ class Board:
                 if piece.getColor() == 'White':
                     self._white_piece_indices.append(index)
                     self._white_piece_objects.append(piece)
+                    self._white_score += self.PIECE_VALUES[type(piece)]
                 else:
                     self._black_piece_indices.append(index)
                     self._black_piece_objects.append(piece)
+                    self._black_score += self.PIECE_VALUES[type(piece)]
+        
 
 
     def get_board(self) -> List[Optional[Piece]]:
