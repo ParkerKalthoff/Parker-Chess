@@ -11,12 +11,13 @@ class Bishop(Piece):
     
     def __str__(self) -> str:
         if super().getColor() == "White": 
-            return 'B' # W
+            return '♗' # W
         else: 
-            return 'b' # B
+            return '♝' # B
 
-    def getMoves(self, position, board) -> list[int]:
-        return diagonals(position, board)
+    #override
+    def updateMoves(self, position, board) -> list[int]:
+        self._potentialMoves = diagonals(position, board)
 
         
 

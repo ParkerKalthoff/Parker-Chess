@@ -4,7 +4,7 @@ from pieces.abstractPiece import Piece
 class Pawn(Piece):
 
     def promote(self, board):
-        return 0
+        raise NotImplementedError
 
     def __init__(self, color):
         super().__init__(color)
@@ -16,12 +16,17 @@ class Pawn(Piece):
     
     def __str__(self):
         if self.getColor() == "White": 
-            return 'P' # W
+            return '♙' # W
         else: 
-            return 'p' # B
-        
-    def getMoves(self, position, board):
-        moveset = pawnMove(self, position, board)
-        self.__canEnpassant__ = False
-        return moveset
+            return '♟' # B
+    
+    def toChar(self):
+        if super().getColor() == "White":
+            return 'P'
+        else:
+            return 'p'
+
+    #override
+    def updateMoves(self, position, board):
+        self._potentialMoves = pawnMove(self, position, board)
         

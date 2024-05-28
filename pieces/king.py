@@ -9,17 +9,22 @@ class King(Piece):
     def __init__(self, color, castleQueenSide = True, castleKingSide = True):
         super().__init__(color)
         self.type = "King"
-        self.inCheck = False
         self.__castleQueenSide__ = castleQueenSide
         self.__castleKingSide__ = castleKingSide
     
     def __str__(self):
         if super().getColor() == "White": 
-            return 'K' # W
+            return '♔' # W
         else: 
-            return 'k' # B
-
-    def getMoves(position, board):
+            return '♚' # B
         
-        moveSet = squareMoves(position, board)
+    def toChar(self):
+        if super().getColor() == "White":
+            return 'K'
+        else:
+            return 'k'
+
+    #override
+    def updateMoves(self, position, board):
+        self._potentialMoves = squareMoves(position, board)
 

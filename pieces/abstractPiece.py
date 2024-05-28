@@ -1,14 +1,18 @@
 class Piece():
 
-    def __init__(self, color) -> None:
+    def __init__(self, color : str) -> None:
         self.color = color
         self.pinned = False
+        self._potentialMoves = []
 
     def getColor(self) -> str:
         return self.color
+    
+    def updateMoves(self) -> None:
+        raise NotImplementedError
 
-    def getMoves() -> None:
-        raise NotImplemented
+    def getMoves(self) -> list:
+        return self._potentialMoves
     
     def pin(self) -> None:
         self.pinned = True

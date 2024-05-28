@@ -11,9 +11,16 @@ class Knight(Piece):
     
     def __str__(self):
         if super().getColor() == "White": 
-            return 'N' # W
+            return '♘' # W
         else: 
-            return 'n' # B
+            return '♞' # B
     
-    def getMoves(self, position, board):
-        return knightMoves(self, position, board)
+    def toChar(self):
+        if super().getColor() == "White":
+            return 'N'
+        else:
+            return 'n'
+
+    #override
+    def updateMoves(self, position, board):
+        self._potentialMoves = knightMoves(self, position, board)

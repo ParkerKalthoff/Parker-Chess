@@ -6,7 +6,6 @@ from pieces.knight import Knight
 from pieces.pawn import Pawn
 from pieces.abstractPiece import Piece
 from board import Board
-from typing import List, Union, Optional
 
 def defaultBoard() -> Board:
     """Creates a default board with the standard starting position."""
@@ -23,7 +22,7 @@ def board(fen_string: str) -> Board:
     for char in parts[0]:
         if char == '/':
             continue
-        board_space.append(charToPiece(char))
+        board_space += charToPiece(char)
 
     is_whites_turn = parts[1] == 'w'
     castling_rights = parse_castling_rights(parts[2])
@@ -86,7 +85,7 @@ def coordinateToIndex(coord: str) -> int:
     index = file_to_index[file] + (8 * (int(rank) - 1))
     return index
 
-def parse_castling_rights(castling_string: str) -> List[bool]:
+def parse_castling_rights(castling_string: str) -> list[bool]:
     """Parses the castling rights string into a list of booleans."""
     return [
         'K' in castling_string,  # White kingside
@@ -95,7 +94,7 @@ def parse_castling_rights(castling_string: str) -> List[bool]:
         'q' in castling_string   # Black queenside
     ]
 
-def charToPiece(char: str) -> List[Optional[Piece]]:
+def charToPiece(char: str) -> Piece:
     """Converts a FEN character to a list containing the corresponding Piece or None."""
     piece_dict = {
         'P': Pawn,

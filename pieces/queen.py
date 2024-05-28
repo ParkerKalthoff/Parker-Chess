@@ -11,12 +11,18 @@ class Queen(Piece):
     
     def __str__(self):
         if super().getColor() == "White": 
-            return 'Q' # W
+            return '♕' # W
         else: 
-            return 'q' # B
+            return '♛' # B
 
-    def getMoves(self, position, board):
-        return diagonals(self, position, board) + straight(self, position, board)
+    def toChar(self):
+        if super().getColor() == "White":
+            return 'Q'
+        else:
+            return 'q'
 
+    #override
+    def updateMoves(self, position, board):
+        self._potentialMoves = diagonals(self, position, board) + straight(self, position, board)
        
 
