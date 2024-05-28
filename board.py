@@ -86,24 +86,31 @@ class Board:
 
         self._white_piece_indices = []
         self._black_piece_indices = []
-        self._white_piece_objects = []
-        self._black_piece_objects = []
+        self._white_pieces = []
+        self._black_pieces = []
+
         self._white_score = 0
         self._black_score = 0
 
         for index, piece in enumerate(self._board_space):
             if piece:
                 if piece.getColor() == 'White':
-                    self._white_piece_indices.append(index)
+                    piece.setPos(index)
                     self._white_pieces.append(piece)
                     self._white_score += self.PIECE_VALUES[type(piece)]
                 else:
-                    self._black_piece_indices.append(index)
+                    piece.setPos(index)
                     self._black_pieces.append(piece)
                     self._black_score += self.PIECE_VALUES[type(piece)]
 
-        # 3. Check for Checks
+        for position, piece in zip(self._white_piece_indices, self._white_pieces):
+            piece.updateMoves(position, self)
 
+        for position, piece in zip(self._black_piece_indices, self._black_pieces):
+            piece.updateMoves(position, self)
+
+        # 3. Check for Checks
+        in_check = self.check_for_checks()
         # 4. Check for Checkmates or Stalemates
 
         # 5. Update Legal Moves
@@ -111,6 +118,35 @@ class Board:
         # 6. Promote Pawns
 
         # 7. Threefold Repetition and Fifty-Move Rule (if applicable)
+
+    def check_for_checks(self) -> bool:
+        """ Checks for checks on board, based on current board state and Active Player in position"""
+
+        if self.is_whites_turn:
+            activePlayerPieces = 
+            idlePlayerVision = self._
+        else:
+
+
+        pass
+
+    def check_for_no_remaining_moves(self) -> bool:
+        """ Checks if no remaining moves are allowed, in tandem with check_for_checks, this can detect checkmate or stalemate """
+        pass
+
+    def update_legal_moves(self):
+        """ loops over pieces to update internal legal moves """
+        pass
+
+    def check_threefold_repeition(self) -> bool:
+        """ Checks if position has been reached 3 times in a game, resulting in stalemate 
+            >>> Returns True for stalemate and False for continued game
+        """
+        pass
+
+    def check_fifty_move_rule(self) -> bool:
+        """ Checks if no pawns have moved and no captures in 50 moves """
+        pass
 
     def get_board(self) -> list[Piece]:
         return self._board_space
@@ -130,6 +166,14 @@ class Board:
 
     def get_all_pieces(self) -> list[dict]:
         return self._white_pieces + self._black_pieces
+
+    def white_piece_vision(self) -> list[list[int]]:
+        """ returns 2d array of white pieces vision """
+        return [piece.getMoves() for piece in self.get_white_pieces()]
+
+    def black_piece_vision(self) -> list[list[int]]:
+        """ returns 2d array of black pieces vision """
+        return [piece.getMoves() for piece in self.get_black_pieces()]
 
     def __str__(self, with_chess_coords: bool = False) -> str:
         column_num = ['1', '2', '3', '4', '5', '6', '7', '8']

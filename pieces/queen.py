@@ -23,6 +23,6 @@ class Queen(Piece):
 
     #override
     def updateMoves(self, position, board):
-        self._potentialMoves = diagonals(self, position, board) + straight(self, position, board)
+        self._potentialMoves = diagonals(self, self.pos(), board) + straight(self, self.pos(), board)
        
 

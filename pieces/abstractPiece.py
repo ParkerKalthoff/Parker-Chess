@@ -4,11 +4,20 @@ class Piece():
         self.color = color
         self.pinned = False
         self._potentialMoves = []
+        self._currentPosition = None
 
     def getColor(self) -> str:
         return self.color
     
-    def updateMoves(self) -> None:
+    def pos(self) -> int:
+        """ Returns current position """
+        return self._currentPosition
+    
+    def setPos(self, new_position) -> None:
+        int(new_position)
+        self._currentPosition = new_position
+
+    def updateMoves(self, board) -> list[int]:
         raise NotImplementedError
 
     def getMoves(self) -> list:

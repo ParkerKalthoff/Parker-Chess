@@ -28,5 +28,5 @@ class Pawn(Piece):
 
     #override
     def updateMoves(self, position, board):
-        self._potentialMoves = pawnMove(self, position, board)
+        self._potentialMoves = pawnMove(self, self.pos(), board)
         

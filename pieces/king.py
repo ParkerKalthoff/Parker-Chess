@@ -25,6 +25,6 @@ class King(Piece):
             return 'k'
 
     #override
-    def updateMoves(self, position, board):
-        self._potentialMoves = squareMoves(position, board)
+    def updateMoves(self, board):
+        self._potentialMoves = squareMoves(self, self.pos(), board)
 

@@ -16,8 +16,8 @@ class Bishop(Piece):
             return '♝' # B
 
     #override
-    def updateMoves(self, position, board) -> list[int]:
-        self._potentialMoves = diagonals(position, board)
+    def updateMoves(self, board) -> list[int]:
+        self._potentialMoves = diagonals(self.pos(), board)
 
         
 

@@ -22,5 +22,5 @@ class Knight(Piece):
             return 'n'
 
     #override
-    def updateMoves(self, position, board):
-        self._potentialMoves = knightMoves(self, position, board)
+    def updateMoves(self, board):
+        self._potentialMoves = knightMoves(self, self.pos(), board)

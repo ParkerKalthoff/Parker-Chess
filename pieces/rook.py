@@ -22,7 +22,7 @@ class Rook(Piece):
 
     #override
     def updateMoves(self, position, board) -> None:
-        self._potentialMoves = straight(self, position, board)
+        self._potentialMoves = straight(self, self.pos(), board)
 
 
 
