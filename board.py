@@ -133,7 +133,7 @@ class Board:
             previousPlayerVision = self.white_piece_vision()
 
         enemy_line_of_sight_on_king = [pieceVision for pieceVision in previousPlayerVision if activePlayersKing.pos() in pieceVision]
-        # this is the vison lines of the enemy on active players king, this will be used to detect double checks
+        # this is the vision lines of the enemy on active players king, this will be used to detect double checks
 
         return enemy_line_of_sight_on_king
 
@@ -157,12 +157,50 @@ class Board:
 
     def to_FEN(self) -> str:
         """ Changes board representation to FEN string"""
-        board_string = ''
 
-        current_rank = 0 # rank is the numbers
-        for square in self._board_space:
-            pass
-        pass
+        # board string
+
+        board_string = ''
+        rank_board_string = ''
+        empty_space_count = 0
+
+        for index, square in enumerate(self._board_space):
+            if index % 8 == 7:  # End of the rank
+                if square:
+
+                    if empty_space_count:
+
+                        rank_board_string += str(empty_space_count)
+                        empty_space_count = 0
+                    rank_board_string += square.toChar()
+
+                else:
+
+                    empty_space_count += 1
+                    if empty_space_count:
+                        rank_board_string += str(empty_space_count)
+                        empty_space_count = 0
+                board_string += rank_board_string
+
+                if index != 63:  # cant add / at end of board string
+                    board_string += '/'
+                rank_board_string = ''
+                empty_space_count = 0
+
+            else:
+                if square:
+                    if empty_space_count:
+                        rank_board_string += str(empty_space_count)
+                        empty_space_count = 0
+                    rank_board_string += square.toChar()
+                else:
+                    empty_space_count += 1
+
+    # Ensure empty spaces at the end of the last rank are accounted for
+        if empty_space_count:
+            rank_board_string += str(empty_space_count)
+
+
 
 
     def piece_moves(self, position: int) -> list[int]:

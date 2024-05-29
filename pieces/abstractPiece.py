@@ -12,10 +12,13 @@ class Piece():
     def pos(self) -> int:
         """ Returns current position """
         return self._currentPosition
-    
+
     def setPos(self, new_position) -> None:
         int(new_position)
         self._currentPosition = new_position
+
+    def toChar(self) -> str:
+        raise NotImplementedError
 
     def updateMoves(self, board) -> list[int]:
         raise NotImplementedError
