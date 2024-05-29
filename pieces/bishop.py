@@ -11,9 +11,9 @@ class Bishop(Piece):
     
     def __str__(self) -> str:
         if super().getColor() == "White": 
-            return '♗' # W
+            return '♝' # W
         else: 
-            return '♝' # B
+            return '♗' # B
 
     #override
     def updateMoves(self, board) -> list[int]:

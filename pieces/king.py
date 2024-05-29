@@ -14,9 +14,9 @@ class King(Piece):
     
     def __str__(self):
         if super().getColor() == "White": 
-            return '♔' # W
+            return '♚' # W
         else: 
-            return '♚' # B
+            return '♔' # B
         
     def toChar(self):
         if super().getColor() == "White":

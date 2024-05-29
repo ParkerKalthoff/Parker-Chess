@@ -13,7 +13,7 @@ class BoardSizeError(Exception):
     pass
 
 class Board:
-    def __init__(self, board_space: list[Piece], is_whites_turn: bool, castling_rights: list[bool], enpassant_sq: int, half_move_clock: int, full_move_number: int, past_positions : list[str]):
+    def __init__(self, board_space: list[Piece], is_whites_turn: bool, castling_rights: list[bool], enpassant_sq: int, half_move_clock: int, full_move_number: int, past_positions : list[str] = None):
         """ 
             Variables : 
                 board_space : a 64 length list of type Piece or None 
@@ -25,7 +25,6 @@ class Board:
                 past_positions : list[str] 
         """
 
-
         self._board_space = board_space
         self.half_move_clock = half_move_clock
         self.full_move_number = full_move_number
@@ -33,13 +32,15 @@ class Board:
         self.enpassant_square = enpassant_sq
         self.is_whites_turn = is_whites_turn
 
-        self.past_positions = past_positions if past_positions else []
+        self.past_positions = past_positions # game move history
 
         self._white_piece_indices = []
         self._black_piece_indices = []
 
         self._white_pieces = []
         self._black_pieces = []
+
+        self._check_vision = [] # Used for requiring pieces to block enemy check on friendly king
 
         self._white_score = 0
         self._black_score = 0
@@ -81,7 +82,7 @@ class Board:
     def refresh_board(self, InitialRefresh = False) -> int:
         """ Refreshes internal board values after piece moves """
 
-        if len(self.get_board()) > 64:
+        if len(self._board_space) > 64:
             raise BoardSizeError("Board size exceeds 64 squares.")
 
         self._white_piece_indices = []
@@ -110,7 +111,7 @@ class Board:
             piece.updateMoves(position, self)
 
         # 3. Check for Checks
-        in_check = self.check_for_checks()
+        in_check = self.return_checks_on_active_king()
         # 4. Check for Checkmates or Stalemates
 
         # 5. Update Legal Moves
@@ -119,16 +120,22 @@ class Board:
 
         # 7. Threefold Repetition and Fifty-Move Rule (if applicable)
 
-    def check_for_checks(self) -> bool:
+    def return_checks_on_active_king(self) -> list[list[int]] | None:
         """ Checks for checks on board, based on current board state and Active Player in position"""
 
         if self.is_whites_turn:
-            activePlayerPieces = 
-            idlePlayerVision = self._
-        else:
+            # White is currently active player
+            activePlayersKing = [piece for piece in self._white_pieces if isinstance(piece, King)][0]
+            previousPlayerVision = self.black_piece_vision()
+        else: 
+            # Black is currently active player
+            activePlayersKing = [piece for piece in self._black_pieces if isinstance(piece, King)][0]
+            previousPlayerVision = self.white_piece_vision()
 
+        enemy_line_of_sight_on_king = [pieceVision for pieceVision in previousPlayerVision if activePlayersKing.pos() in pieceVision]
+        # this is the vison lines of the enemy on active players king, this will be used to detect double checks
 
-        pass
+        return enemy_line_of_sight_on_king
 
     def check_for_no_remaining_moves(self) -> bool:
         """ Checks if no remaining moves are allowed, in tandem with check_for_checks, this can detect checkmate or stalemate """
@@ -148,8 +155,15 @@ class Board:
         """ Checks if no pawns have moved and no captures in 50 moves """
         pass
 
-    def get_board(self) -> list[Piece]:
-        return self._board_space
+    def to_FEN(self) -> str:
+        """ Changes board representation to FEN string"""
+        board_string = ''
+
+        current_rank = 0 # rank is the numbers
+        for square in self._board_space:
+            pass
+        pass
+
 
     def piece_moves(self, position: int) -> list[int]:
         piece = self._board_space[position]
@@ -158,22 +172,21 @@ class Board:
     def get_square(self, position: int) -> Piece | None:
         return self._board_space[position]
 
-    def get_white_pieces(self) -> list[Piece]:
-        return self._white_pieces
-
-    def get_black_pieces(self) -> list[Piece]:
-        return self._black_pieces
-
-    def get_all_pieces(self) -> list[dict]:
+    def get_all_pieces(self) -> list[Piece]:
+        """ Unused, leaving for now"""
         return self._white_pieces + self._black_pieces
+
+    def combine_lists(input_list : list[list[int]]) -> list[int]:
+        """ Returns a flat representation of a 2d array """
+        return [item for list in input_list for item in list]
 
     def white_piece_vision(self) -> list[list[int]]:
         """ returns 2d array of white pieces vision """
-        return [piece.getMoves() for piece in self.get_white_pieces()]
+        return [piece.getMoves() for piece in self._white_pieces]
 
     def black_piece_vision(self) -> list[list[int]]:
         """ returns 2d array of black pieces vision """
-        return [piece.getMoves() for piece in self.get_black_pieces()]
+        return [piece.getMoves() for piece in self._black_pieces]
 
     def __str__(self, with_chess_coords: bool = False) -> str:
         column_num = ['1', '2', '3', '4', '5', '6', '7', '8']
