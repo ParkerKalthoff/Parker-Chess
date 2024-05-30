@@ -1,6 +1,7 @@
 import os
 import sys
 from pieces.abstractPiece import Piece
+from pieces.moves import enpassant
 from pieces.queen import Queen
 from pieces.king import King
 from pieces.bishop import Bishop
@@ -89,6 +90,7 @@ class Board:
         self._black_piece_indices = []
         self._white_pieces = []
         self._black_pieces = []
+        
         self._inCheck = False
 
         self._white_score = 0
@@ -107,19 +109,19 @@ class Board:
 
         if self.is_whites_turn:
             for piece in self._white_pieces:
-                piece.unPin()
+                piece.unpin()
             for position, piece in zip(self._black_piece_indices, self._black_pieces):
                 piece.updateMoves(position, self)
         else:
             for piece in self._black_pieces:
-                piece.unPin()
+                piece.unin()
             for position, piece in zip(self._white_piece_indices, self._white_pieces):
                 piece.updateMoves(position, self)
 
         # 3. Check for Checks
         enemy_sight_on_king = self.checks_on_active_king()
 
-        if enemy_sight_on_king: # If there is signtline on king, this will be false
+        if enemy_sight_on_king: # If there is sight line on king, this will be false
             self._inCheck = True
 
         # 4. Check for Checkmates or Stalemates
@@ -210,8 +212,22 @@ class Board:
         if empty_space_count:
             rank_board_string += str(empty_space_count)
 
+        turn_string = 'w' if self.is_whites_turn else 'b'
 
+        castling_rights = ''
+        if self.castling[0]: castling_rights += 'K'
+        if self.castling[1]: castling_rights += 'Q'
+        if self.castling[2]: castling_rights += 'k'
+        if self.castling[3]: castling_rights += 'q'
+        if not castling_rights: castling_rights = '-'
 
+        enpassant_string = ''
+        if self.enpassant_square:
+            enpassant_string = f'{chr((self.enpassant_square % 8) + 97)}{(self.enpassant_square // 8) + 1}'
+        else:
+            enpassant_string = '-'
+
+        return f'{board_string} {turn_string} {castling_rights} {enpassant_string} {self.half_move_clock} {self.full_move_number}'
 
     def piece_moves(self, position: int) -> list[int]:
         piece = self._board_space[position]

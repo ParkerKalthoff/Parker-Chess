@@ -8,6 +8,18 @@ class Rook(Piece):
         self.type = "Rook"
         self._canCastle = True
     
+    def setCastlingCondition(self, side : int, castling_rights : list[bool] ):
+        self._side = side
+        self._castling_rights = castling_rights
+
+        # 0 : KR
+        # 1 : QR
+        # 2 : kr
+        # 3 : qr
+
+    def disableCastling(self):
+        self._castling_rights[self._side] = False
+
     def __str__(self):
         if super().getColor() == "White": 
             return '♜' # W
@@ -21,7 +33,7 @@ class Rook(Piece):
             return 'r'
 
     #override
-    def updateMoves(self, position, board) -> None:
+    def updateVision(self, position, board) -> None:
         self._potentialMoves = straight(self, self.pos(), board)
 
 

@@ -3,7 +3,7 @@ class Piece():
     def __init__(self, color : str) -> None:
         self.color = color
         self.pinned = False
-        self._potentialMoves = []
+        self._pieceVision = []
         self._currentPosition = None
 
     def getColor(self) -> str:
@@ -20,11 +20,11 @@ class Piece():
     def toChar(self) -> str:
         raise NotImplementedError
 
-    def updateMoves(self, board) -> list[int]:
+    def updateVision(self, board) -> list[int]:
         raise NotImplementedError
 
-    def getMoves(self) -> list:
-        return self._potentialMoves
+    def getVision(self) -> list:
+        return self._pieceVision
     
     def pin(self) -> None:
         self.pinned = True
