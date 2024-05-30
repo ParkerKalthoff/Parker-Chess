@@ -1,7 +1,6 @@
-from util import isValidPos, x_Pos, y_Pos, xy_Pos  # Import from utils
+from util import isValidPos, x_Pos, y_Pos, xy_Pos
 
 def getTeams(piece, board) -> tuple[list[int], list[int]]:
-    """Returns lists of friendly and enemy piece indices."""
     if piece.getColor() == "White":
         return board.whitePieceIndcies(), board.blackPieceIndcies()
     return board.blackPieceIndcies(), board.whitePieceIndcies()
@@ -9,7 +8,6 @@ def getTeams(piece, board) -> tuple[list[int], list[int]]:
 # -----  -----  -----  -----  -----  -----  -----
 
 def pawnMove(piece, position: int, board) -> list[int]:
-    """Returns the possible moves for a pawn at a given position."""
     if not isValidPos(position):
         raise IndexError("Invalid position")
     moveset = (pawnForward(piece, position, board) +
@@ -18,7 +16,6 @@ def pawnMove(piece, position: int, board) -> list[int]:
     return sorted(moveset)
 
 def enpassant(piece, position: int, board) -> list[int]:
-    """Returns the en passant move for a pawn if applicable."""
     if not piece.canEnpassant():
         return []
 
@@ -69,59 +66,68 @@ def pawnTake(piece, position: int, board) -> list[int]:
 # -----  -----  -----  -----  -----  -----  -----
 
 def straight(piece, position: int, board) -> list[int]:
-    """Returns the possible straight-line moves for a rook or queen."""
     result = []
     if not isValidPos(position):
         raise IndexError("Invalid position")
 
-    x, y = xy_Pos(position)
+    offsets = [-8, 8, -1, 1]
     friendlyPieces, enemyPieces = getTeams(piece, board)
 
-    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-    for dx, dy in directions:
+    for offset in offsets:
+        foundEnemyKing = False
         for i in range(1, 8):
-            newX, newY = x + i * dx, y + i * dy
-            if not (0 <= newX < 8 and 0 <= newY < 8):
+            mySquare = position + i * offset
+            if not isValidPos(mySquare):
                 break
-            mySquare = newY * 8 + newX
             if mySquare in friendlyPieces:
                 break
-            result.append(mySquare)
             if mySquare in enemyPieces:
+                targetPiece = board.getSquare(mySquare)
+                if targetPiece.getType() == "King" and targetPiece.getColor() != piece.getColor():
+                    foundEnemyKing = True
                 break
+            result.append(mySquare)
+
+        if foundEnemyKing:
+            piece.pin()
 
     return sorted(result)
 
 # -----  -----  -----  -----  -----  -----  -----
 
 def diagonals(piece, position: int, board) -> list[int]:
-    """Returns the possible diagonal moves for a bishop or queen."""
+    """ returns the possible diagonal moves for a bishop or queen """
     result = []
     if not isValidPos(position):
         raise IndexError("Invalid position")
 
-    x, y = xy_Pos(position)
+    offsets = [-9, -7, 7, 9]
     friendlyPieces, enemyPieces = getTeams(piece, board)
 
-    directions = [(-1, -1), (1, -1), (-1, 1), (1, 1)]
-    for dx, dy in directions:
+    for offset in offsets:
+        foundEnemyKing = False
         for i in range(1, 8):
-            newX, newY = x + i * dx, y + i * dy
-            if not (0 <= newX < 8 and 0 <= newY < 8):
+            mySquare = position + i * offset
+            if not isValidPos(mySquare):
                 break
-            mySquare = newY * 8 + newX
             if mySquare in friendlyPieces:
                 break
-            result.append(mySquare)
             if mySquare in enemyPieces:
+                targetPiece = board.getSquare(mySquare)
+                if targetPiece.getType() == "King" and targetPiece.getColor() != piece.getColor():
+                    foundEnemyKing = True
                 break
+            result.append(mySquare)
+
+        if foundEnemyKing:
+            piece.pin()
 
     return sorted(result)
 
 # -----  -----  -----  -----  -----  -----  -----
 
 def squareMoves(piece, position: int, board) -> list[int]:
-    """Returns the possible moves for a king."""
+    """ returns the possible moves for a king """
     if not isValidPos(position):
         raise IndexError("Invalid position")
 
@@ -135,7 +141,7 @@ def squareMoves(piece, position: int, board) -> list[int]:
 # -----  -----  -----  -----  -----  -----  -----
 
 def knightMoves(piece, position: int, board) -> list[int]:
-    """Returns the possible moves for a knight."""
+    """ returns the possible moves for a knight """
     if not isValidPos(position):
         raise IndexError("Invalid position")
 

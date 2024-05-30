@@ -89,6 +89,7 @@ class Board:
         self._black_piece_indices = []
         self._white_pieces = []
         self._black_pieces = []
+        self._inCheck = False
 
         self._white_score = 0
         self._black_score = 0
@@ -104,14 +105,23 @@ class Board:
                     self._black_pieces.append(piece)
                     self._black_score += self.PIECE_VALUES[type(piece)]
 
-        for position, piece in zip(self._white_piece_indices, self._white_pieces):
-            piece.updateMoves(position, self)
-
-        for position, piece in zip(self._black_piece_indices, self._black_pieces):
-            piece.updateMoves(position, self)
+        if self.is_whites_turn:
+            for piece in self._white_pieces:
+                piece.unPin()
+            for position, piece in zip(self._black_piece_indices, self._black_pieces):
+                piece.updateMoves(position, self)
+        else:
+            for piece in self._black_pieces:
+                piece.unPin()
+            for position, piece in zip(self._white_piece_indices, self._white_pieces):
+                piece.updateMoves(position, self)
 
         # 3. Check for Checks
-        in_check = self.return_checks_on_active_king()
+        enemy_sight_on_king = self.checks_on_active_king()
+
+        if enemy_sight_on_king: # If there is signtline on king, this will be false
+            self._inCheck = True
+
         # 4. Check for Checkmates or Stalemates
 
         # 5. Update Legal Moves
@@ -120,7 +130,7 @@ class Board:
 
         # 7. Threefold Repetition and Fifty-Move Rule (if applicable)
 
-    def return_checks_on_active_king(self) -> list[list[int]] | None:
+    def checks_on_active_king(self) -> list[list[int]] | None:
         """ Checks for checks on board, based on current board state and Active Player in position"""
 
         if self.is_whites_turn:
