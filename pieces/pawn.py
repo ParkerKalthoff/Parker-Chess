@@ -27,6 +27,6 @@ class Pawn(Piece):
             return 'p'
 
     #override
-    def updateMoves(self, position, board):
+    def updateVision(self, position, board):
         self._potentialMoves = pawnMove(self, self.pos(), board)
         

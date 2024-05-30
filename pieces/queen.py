@@ -22,7 +22,7 @@ class Queen(Piece):
             return 'q'
 
     #override
-    def updateMoves(self, position, board):
+    def updateVision(self, position, board):
         self._potentialMoves = diagonals(self, self.pos(), board) + straight(self, self.pos(), board)
        
 

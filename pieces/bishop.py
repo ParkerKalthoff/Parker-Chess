@@ -17,7 +17,7 @@ class Bishop(Piece):
 
     #override
     def updateMoves(self, board) -> list[int]:
-        self._potentialMoves = diagonals(self.pos(), board)
+        self._pieceVision = diagonals(self.pos(), board)
 
         
 
