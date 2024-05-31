@@ -65,9 +65,8 @@ def pawnTake(piece, position: int, board) -> list[int]:
 
 # -----  -----  -----  -----  -----  -----  -----
 
-def straight(piece, position: int, board) -> tuple[list[int], list[int]]:
+def straight(piece, position: int, board) -> list[int]:
     result = []
-    pinning_line_of_sight = []
 
     if not isValidPos(position):
         raise IndexError("Invalid position")
@@ -94,17 +93,15 @@ def straight(piece, position: int, board) -> tuple[list[int], list[int]]:
             current_line_of_sight.append(mySquare)
 
         if foundEnemyKing:
-            piece.pin()
-            pinning_line_of_sight = current_line_of_sight
+            piece.pin(sorted(current_line_of_sight))
 
-    return sorted(result), sorted(pinning_line_of_sight)
+    return sorted(result)
 
 # -----  -----  -----  -----  -----  -----  -----
 
-def diagonals(piece, position: int, board) -> tuple[list[int], list[int]]:
+def diagonals(piece, position: int, board) -> list[int]:
     """ returns the possible diagonal moves for a bishop or queen """
     result = []
-    pinning_line_of_sight = []  # This will store the pathway if an enemy King is found and the piece is pinned
     if not isValidPos(position):
         raise IndexError("Invalid position")
 
@@ -130,10 +127,9 @@ def diagonals(piece, position: int, board) -> tuple[list[int], list[int]]:
             current_line_of_sight.append(mySquare)
 
         if foundEnemyKing:
-            piece.pin()
-            pinning_line_of_sight = current_line_of_sight
+            piece.pin(sorted(current_line_of_sight))
 
-    return sorted(result), sorted(pinning_line_of_sight)
+    return sorted(result)
 
 
 # -----  -----  -----  -----  -----  -----  -----

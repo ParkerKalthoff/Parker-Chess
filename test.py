@@ -1,4 +1,4 @@
-import boardFactory, board
+import boardFactory
 
 b = boardFactory.defaultBoard()
 print(b)

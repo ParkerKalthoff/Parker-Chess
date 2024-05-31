@@ -1,7 +1,5 @@
-import os
-import sys
+
 from pieces.abstractPiece import Piece
-from pieces.moves import enpassant
 from pieces.queen import Queen
 from pieces.king import King
 from pieces.bishop import Bishop
@@ -90,7 +88,7 @@ class Board:
         self._black_piece_indices = []
         self._white_pieces = []
         self._black_pieces = []
-        
+
         self._inCheck = False
 
         self._white_score = 0
@@ -107,15 +105,23 @@ class Board:
                     self._black_pieces.append(piece)
                     self._black_score += self.PIECE_VALUES[type(piece)]
 
-        if self.is_whites_turn:
+        if self.is_whites_turn: # this step might need to be refactored for clarity (idk if it matters whose turn)
             for piece in self._white_pieces:
                 piece.unpin()
             for position, piece in zip(self._black_piece_indices, self._black_pieces):
                 piece.updateMoves(position, self)
+            for piece in self._black_pieces:
+                piece.unpin()
+            for position, piece in zip(self._white_piece_indices, self._white_pieces):
+                piece.updateMoves(position, self)
         else:
             for piece in self._black_pieces:
-                piece.unin()
+                piece.unpin()
             for position, piece in zip(self._white_piece_indices, self._white_pieces):
+                piece.updateMoves(position, self)
+            for piece in self._white_pieces:
+                piece.unpin()
+            for position, piece in zip(self._black_piece_indices, self._black_pieces):
                 piece.updateMoves(position, self)
 
         # 3. Check for Checks
@@ -124,6 +130,16 @@ class Board:
         if enemy_sight_on_king: # If there is sight line on king, this will be false
             self._inCheck = True
 
+        if self._inCheck: # culls non check preventing moves from other pieces
+            if self.is_whites_turn:
+                for piece in self._white_pieces:
+                    if not isinstance(piece, King):
+                        piece.movesPreventingCheck(enemy_sight_on_king)
+            else:
+                for piece in self._black_pieces:
+                    if not isinstance(piece, King):
+                        piece.movesPreventingCheck(enemy_sight_on_king)
+
         # 4. Check for Checkmates or Stalemates
 
         # 5. Update Legal Moves
@@ -131,6 +147,17 @@ class Board:
         # 6. Promote Pawns
 
         # 7. Threefold Repetition and Fifty-Move Rule (if applicable)
+
+    def movePiece(self, original_index : str, new_index : str):
+        
+        if new_index in ['O-O', 'O-O-O']:
+            
+            if self.is_whites_turn:
+
+                raise ValueError()
+        
+        
+        
 
     def checks_on_active_king(self) -> list[list[int]] | None:
         """ Checks for checks on board, based on current board state and Active Player in position"""
