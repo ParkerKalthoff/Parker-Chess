@@ -1,4 +1,6 @@
 
+import enum
+from math import perm
 from pieces.abstractPiece import Piece
 from pieces.queen import Queen
 from pieces.king import King
@@ -31,7 +33,7 @@ class Board:
         self.enpassant_square = enpassant_sq
         self.is_whites_turn = is_whites_turn
 
-        self.past_positions = past_positions # game move history
+        self.past_positions = past_positions if past_positions else [] # game move history
 
         self._white_piece_indices = []
         self._black_piece_indices = []
@@ -55,8 +57,16 @@ class Board:
 
         self.refresh_board()
 
+    def combine_lists(input_list : list[list[int]]) -> list[int]:
+        """ Returns a flat representation of a 2d array """
+        return [item for list in input_list for item in list]
+
     def next_turn(self) -> None:
         self.is_whites_turn = not self.is_whites_turn
+        self.past_positions.append(self.to_FEN())
+
+        if self.is_whites_turn:
+            self.full_move_number += 1
 
     def white_piece_indices(self) -> list[int]:
         return self._white_piece_indices
@@ -147,15 +157,44 @@ class Board:
         # 7. Threefold Repetition and Fifty-Move Rule (if applicable)
 
     def movePiece(self, original_index : str, new_index : str):
-        
-        if new_index in ['O-O', 'O-O-O']:
-            
-            if self.is_whites_turn:
+        pass
 
-                raise ValueError()
         
         
+    def check_if_castling_blocked(self) -> list[bool]:
+        """ 
+            Returns a list of allowed Castling moves, based on enemy piece vision and friendly piece placement
+            >>> Bools for [ K, Q, k, q ] castling
+            trying to keep this method really general
+        """
         
+        white_kingside = [61,62]
+        white_queenside = [57,58,59]
+        black_kingside = [5,6]
+        black_queenside = [1,2,3]
+
+        castling_squares_list = [white_kingside, white_queenside, black_kingside, black_queenside]
+
+        white_vision = self.combine_lists(self.white_piece_vision())
+        black_vision = self.combine_lists(self.black_piece_vision())
+
+        permitted_castling = []
+
+        if self._inCheck:
+            return [False, False, False, False] # no castling in check
+
+        for list_index, castling_squares in enumerate(castling_squares_list):
+            valid_to_castle = True
+            for square in castling_squares:
+                if list_index in [1,2]: # white
+                    if square in black_vision or self.get_square(square):
+                        valid_to_castle = False
+                        break
+            permitted_castling.append(valid_to_castle)
+
+        # TODO do a logical and operation on the castling permissions and actual allowed castles, decide what to do form there
+
+
 
     def checks_on_active_king(self) -> list[list[int]] | None:
         """ Checks for checks on board, based on current board state and Active Player in position"""
@@ -256,7 +295,6 @@ class Board:
             enpassant_string = f'{chr((self.enpassant_square % 8) + 97)}{(self.enpassant_square // 8) + 1}'
         else:
             enpassant_string = '-'
-
         return f'{board_string} {turn_string} {castling_rights} {enpassant_string} {self.half_move_clock} {self.full_move_number}'
 
     def piece_moves(self, position: int) -> list[int]:
@@ -269,10 +307,6 @@ class Board:
     def get_all_pieces(self) -> list[Piece]:
         """ Unused, leaving for now"""
         return self._white_pieces + self._black_pieces
-
-    def combine_lists(input_list : list[list[int]]) -> list[int]:
-        """ Returns a flat representation of a 2d array """
-        return [item for list in input_list for item in list]
 
     def white_piece_vision(self) -> list[list[int]]:
         """ returns 2d array of white pieces vision """
