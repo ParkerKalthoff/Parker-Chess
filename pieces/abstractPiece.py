@@ -32,7 +32,7 @@ class Piece():
         if self.pinned:
             self.valid_moves = [move for move in self._pinned_line_of_sight if move in self._pieceVision]
         else:
-            self.valid_moves = self.getVision()
+            self.valid_moves = self._pieceVision
 
     def movesPreventingCheck(self, check_on_king : list[list[int]]):
         """ takes 'valid moves' and prunes move that dont stop check, only used when in check """

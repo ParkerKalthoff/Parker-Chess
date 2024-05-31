@@ -1,4 +1,4 @@
 import boardFactory
 
 b = boardFactory.defaultBoard()
-print(b)
+print(b.display_board())

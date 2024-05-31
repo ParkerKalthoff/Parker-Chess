@@ -39,8 +39,6 @@ class Board:
         self._white_pieces = []
         self._black_pieces = []
 
-        self._check_vision = [] # Used for requiring pieces to block enemy check on friendly king
-
         self._white_score = 0
         self._black_score = 0
 
@@ -109,20 +107,20 @@ class Board:
             for piece in self._white_pieces:
                 piece.unpin()
             for position, piece in zip(self._black_piece_indices, self._black_pieces):
-                piece.updateMoves(position, self)
+                piece.updateVision(position, self)
             for piece in self._black_pieces:
                 piece.unpin()
             for position, piece in zip(self._white_piece_indices, self._white_pieces):
-                piece.updateMoves(position, self)
+                piece.updateVision(position, self)
         else:
             for piece in self._black_pieces:
                 piece.unpin()
             for position, piece in zip(self._white_piece_indices, self._white_pieces):
-                piece.updateMoves(position, self)
+                piece.updateVision(position, self)
             for piece in self._white_pieces:
                 piece.unpin()
             for position, piece in zip(self._black_piece_indices, self._black_pieces):
-                piece.updateMoves(position, self)
+                piece.updateVision(position, self)
 
         # 3. Check for Checks
         enemy_sight_on_king = self.checks_on_active_king()
@@ -193,6 +191,11 @@ class Board:
     def check_fifty_move_rule(self) -> bool:
         """ Checks if no pawns have moved and no captures in 50 moves """
         pass
+
+    def stalemateByMaterial(self) -> bool:
+        """ Checks for stalemate by lack of material
+            >>> Cases 
+        """
 
     def to_FEN(self) -> str:
         """ Changes board representation to FEN string"""
@@ -294,6 +297,7 @@ class Board:
             output_str += row_str + "\n"
         if with_chess_coords:
             output_str += "     a    b    c    d    e    f    g    h"
+            output_str += f"\n Score : {self.get_score()}, Active turn : {'w' if self.is_whites_turn else 'b'}, Turn : {self.full_move_number}"
         return output_str
 
     def display_board(self) -> str:
