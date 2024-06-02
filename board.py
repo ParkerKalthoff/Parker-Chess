@@ -87,7 +87,9 @@ class Board:
         return self.is_whites_turn
 
     def refresh_board(self, InitialRefresh = False) -> int:
-        """ Refreshes internal board values after piece moves """
+        """ Refreshes internal board values after piece moves 
+            >>> InitalRefresh is to not overwrite initial values set by the same, may remove
+        """
 
         if len(self._board_space) > 64:
             raise BoardSizeError("Board size exceeds 64 squares.")
@@ -108,42 +110,32 @@ class Board:
                     piece.setPos(index)
                     self._white_pieces.append(piece)
                     self._white_score += self.PIECE_VALUES[type(piece)]
-                else:
+                else: # piece.getColor() == 'Black'
                     piece.setPos(index)
                     self._black_pieces.append(piece)
                     self._black_score += self.PIECE_VALUES[type(piece)]
 
-        if self.is_whites_turn: # this step might need to be refactored for clarity (idk if it matters whose turn)
-            for piece in self._white_pieces:
-                piece.unpin()
-            for position, piece in zip(self._black_piece_indices, self._black_pieces):
-                piece.updateVision(position, self)
-            for piece in self._black_pieces:
-                piece.unpin()
-            for position, piece in zip(self._white_piece_indices, self._white_pieces):
-                piece.updateVision(position, self)
-        else:
-            for piece in self._black_pieces:
-                piece.unpin()
-            for position, piece in zip(self._white_piece_indices, self._white_pieces):
-                piece.updateVision(position, self)
-            for piece in self._white_pieces:
-                piece.unpin()
-            for position, piece in zip(self._black_piece_indices, self._black_pieces):
-                piece.updateVision(position, self)
+        for piece in self._white_pieces:
+            piece.unpin()
+        for position, piece in zip(self._black_piece_indices, self._black_pieces):
+            piece.updateVision(position, self)
+        for piece in self._black_pieces:
+            piece.unpin()
+        for position, piece in zip(self._white_piece_indices, self._white_pieces):
+            piece.updateVision(position, self)
 
         # 3. Check for Checks
         enemy_sight_on_king = self.checks_on_active_king()
 
-        if enemy_sight_on_king: # If there is sight line on king, this will be false
+        if enemy_sight_on_king: # using to make code more readible, enemy_sight_on_king is either [] or [[1,2,3]] or [[1,2,3], [1,2]]
             self._inCheck = True
 
         if self._inCheck: # culls non check preventing moves from other pieces
-            if self.is_whites_turn:
+            if self.is_whites_turn: # if white is active player
                 for piece in self._white_pieces:
                     if not isinstance(piece, King):
                         piece.movesPreventingCheck(enemy_sight_on_king)
-            else:
+            else: # if black is active 
                 for piece in self._black_pieces:
                     if not isinstance(piece, King):
                         piece.movesPreventingCheck(enemy_sight_on_king)
@@ -186,15 +178,22 @@ class Board:
         for list_index, castling_squares in enumerate(castling_squares_list):
             valid_to_castle = True
             for square in castling_squares:
-                if list_index in [1,2]: # white
+                if list_index in [0, 1]:  # white castling indexes
                     if square in black_vision or self.get_square(square):
+                        valid_to_castle = False
+                        break
+                elif list_index in [2, 3]:  # black castling indexes
+                    if square in white_vision or self.get_square(square):
                         valid_to_castle = False
                         break
             permitted_castling.append(valid_to_castle)
 
-        # TODO do a logical and operation on the castling permissions and actual allowed castles, decide what to do form there
+    
+        legal_castling = [] # Does a logical 'and' to return moves that are both not putting king in check and are legal
+        for valid_castle, permitted_castle in zip(self.castling, permitted_castling):
+            legal_castling.append(valid_castle and permitted_castle)
 
-
+        return legal_castling
 
     def checks_on_active_king(self) -> list[list[int]] | None:
         """ Checks for checks on board, based on current board state and Active Player in position"""
@@ -297,6 +296,12 @@ class Board:
             enpassant_string = '-'
         return f'{board_string} {turn_string} {castling_rights} {enpassant_string} {self.half_move_clock} {self.full_move_number}'
 
+    def coordToInt(coord: str) -> int:
+        return (ord(coord[0].lower()) - 97) * 8 + int(coord[1]) - 1
+    
+    def intToCoord(integer: int) -> str:
+        return f'{chr((integer % 8) + 97)}{(integer // 8) + 1}'
+    
     def piece_moves(self, position: int) -> list[int]:
         piece = self._board_space[position]
         return piece.getMoves(position, self) if piece else []

@@ -23,7 +23,8 @@ class Pawn(Piece):
     def toChar(self):
         if super().getColor() == "White":
             return 'P'
-        else:
+        else: 
+         # super().getColor() == "Black":
             return 'p'
 
     #override
