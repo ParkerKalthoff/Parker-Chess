@@ -130,6 +130,11 @@ class Board:
         if enemy_sight_on_king: # using to make code more readible, enemy_sight_on_king is either [] or [[1,2,3]] or [[1,2,3], [1,2]]
             self._inCheck = True
 
+        for piece in self._white_pieces:
+            piece.visionToMoves()
+        for piece in self._black_pieces:
+            piece.visionToMoves()
+
         if self._inCheck: # culls non check preventing moves from other pieces
             if self.is_whites_turn: # if white is active player
                 for piece in self._white_pieces:
@@ -298,10 +303,10 @@ class Board:
 
     def coordToInt(coord: str) -> int:
         return (ord(coord[0].lower()) - 97) * 8 + int(coord[1]) - 1
-    
+
     def intToCoord(integer: int) -> str:
         return f'{chr((integer % 8) + 97)}{(integer // 8) + 1}'
-    
+
     def piece_moves(self, position: int) -> list[int]:
         piece = self._board_space[position]
         return piece.getMoves(position, self) if piece else []

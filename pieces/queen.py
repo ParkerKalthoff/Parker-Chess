@@ -19,7 +19,7 @@ class Queen(Piece):
         if super().getColor() == "White":
             return 'Q'
         else:
-            return 'q'
+            return 'q' 
 
     #override
     def updateVision(self, position, board):

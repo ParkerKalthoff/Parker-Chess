@@ -12,10 +12,10 @@ class Rook(Piece):
         self._side = side
         self._castling_rights = castling_rights
 
-        # 0 : KR
-        # 1 : QR
-        # 2 : kr
-        # 3 : qr
+        # 0 : White kings rook
+        # 1 : White queens rook
+        # 2 : black kings rook
+        # 3 : black queens rook
 
     def disableCastling(self):
         self._castling_rights[self._side] = False
