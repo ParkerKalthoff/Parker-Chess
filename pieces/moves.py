@@ -19,7 +19,7 @@ def enpassant(piece, position: int, board) -> list[int]:
     if not piece.canEnpassant():
         return []
 
-    direction = 1 if piece.getColor() == "White" else -1
+    direction = -1 if piece.getColor() == "White" else 1
     endSquare = position + (16 * direction)
     firstSquare = position + (8 * direction)
 
@@ -30,7 +30,7 @@ def enpassant(piece, position: int, board) -> list[int]:
 def pawnForward(piece, position: int, board) -> list[int]:
     """Returns the forward moves for a pawn."""
 
-    direction = 1 if piece.getColor() == "White" else -1
+    direction = -1 if piece.getColor() == "White" else 1
     firstSquare = position + (8 * direction)
 
     if not isValidPos(firstSquare) or board.getSquare(firstSquare):
@@ -39,7 +39,7 @@ def pawnForward(piece, position: int, board) -> list[int]:
 
 def pawnTake(piece, position: int, board) -> list[int]:
     """Returns the capturing moves for a pawn."""
-    direction = 1 if piece.getColor() == "White" else -1
+    direction = -1 if piece.getColor() == "White" else 1
     rightSquare = position + (7 * direction)
     leftSquare = position + (9 * direction)
 

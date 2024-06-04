@@ -1,6 +1,3 @@
-
-import enum
-from math import perm
 from pieces.abstractPiece import Piece
 from pieces.queen import Queen
 from pieces.king import King
@@ -57,7 +54,7 @@ class Board:
 
         self.refresh_board()
 
-    def combine_lists(input_list : list[list[int]]) -> list[int]:
+    def combine_lists(self, input_list : list[list[int]]) -> list[int]:
         """ Returns a flat representation of a 2d array """
         return [item for list in input_list for item in list]
 
@@ -115,6 +112,9 @@ class Board:
                     self._black_pieces.append(piece)
                     self._black_score += self.PIECE_VALUES[type(piece)]
 
+        print(self._white_pieces)
+        print(self._black_pieces)
+
         for piece in self._white_pieces:
             piece.unpin()
         for position, piece in zip(self._black_piece_indices, self._black_pieces):
@@ -128,12 +128,8 @@ class Board:
         enemy_sight_on_king = self.checks_on_active_king()
 
         if enemy_sight_on_king: # using to make code more readible, enemy_sight_on_king is either [] or [[1,2,3]] or [[1,2,3], [1,2]]
+            print('Check!')
             self._inCheck = True
-
-        for piece in self._white_pieces:
-            piece.visionToMoves()
-        for piece in self._black_pieces:
-            piece.visionToMoves()
 
         if self._inCheck: # culls non check preventing moves from other pieces
             if self.is_whites_turn: # if white is active player
@@ -145,18 +141,97 @@ class Board:
                     if not isinstance(piece, King):
                         piece.movesPreventingCheck(enemy_sight_on_king)
 
+        allowed_castles = self.check_if_castling_blocked()
+
+        self.update_legal_moves()
+
+        if not self._inCheck:
+            if self.is_whites_turn:
+                for piece in self._white_pieces:
+                    if isinstance(piece, King):
+                        if allowed_castles[0]:
+                            piece.valid_moves.append('O-O')    
+                        if allowed_castles[1]:
+                            piece.valid_moves.append('O-O-O')  
+            else:
+                for piece in self._black_pieces:
+                    if isinstance(piece, King):
+                        if allowed_castles[2]:
+                            piece.valid_moves.append('O-O')    
+                        if allowed_castles[3]:
+                            piece.valid_moves.append('O-O-O')  
+                        
         # 4. Check for Checkmates or Stalemates
 
-        # 5. Update Legal Moves
+        if not self.active_player_legal_moves():
+            if self._inCheck:
+                print('Checkmate!')
+            print('Stalemate!')
 
-        # 6. Promote Pawns
+    def movePiece(self, original_index : str, new_index : str) -> str:
+        """ Returns 'Valid' or 'Invalid' and updates board state """
+        original_index = self.coordToInt(original_index)
 
-        # 7. Threefold Repetition and Fifty-Move Rule (if applicable)
+        if new_index not in ['O-O-O', 'O-O']: # checks if move is a castle move
+            new_index = self.coordToInt(new_index) # converts new_index to a int 0-63
+        else: # Castle
+            if not self.is_whites_turn and isinstance(self.get_square(60), King) and self.get_square(60).getColor() == 'Black' and new_index in self.get_square(60).getMoves():
+                    if new_index == 'O-O-O': # ♖___♔___ -> __♔♖____ 
+                        self.get_square(60).disableCastling()
+                        self._board_space[58] = self.get_square(60)
+                        self._board_space[59] = self._board_space[56]
+                        self._board_space[60] = None
+                        self._board_space[56] = None
+                    else: # new_index == 'O-O' ____♔__♖ -> _____♖♔_
+                        self.get_square(60).disableCastling()
+                        self._board_space[62] = self.get_square(60)
+                        self._board_space[61] = self._board_space[63]
+                        self._board_space[60] = None
+                        self._board_space[63] = None
+            elif self.is_whites_turn and isinstance(self.get_square(4), King) and self.get_square(4).getColor() == 'Black' and new_index in self.get_square(4).getMoves():
+                    if new_index == 'O-O': # ♜__♚____ -> _♚♜_____ 
+                        self.get_square(4).disableCastling()
+                        self._board_space[2] = self.get_square(4)
+                        self._board_space[3] = self._board_space[0]
+                        self._board_space[4] = None
+                        self._board_space[0] = None
+                    else: # new_index == 'O-O-O' ___♚___♜ -> ____♜♚__ 
+                        self.get_square(4).disableCastling()
+                        self._board_space[6] = self.get_square(4)
+                        self._board_space[5] = self._board_space[7]
+                        self._board_space[4] = None
+                        self._board_space[7] = None
 
-    def movePiece(self, original_index : str, new_index : str):
-        pass
 
+        # Normal Move
+
+        if not self.get_square(original_index):
+            print('Invalid: Empty Square')
+            return 'Invalid'
+
+        selected_piece = self.get_square(original_index)
         
+        selected_piece = self.get_square(original_index)
+
+        if selected_piece.getColor() == "White" and self.is_whites_turn:
+            turn_color = "White"
+        elif selected_piece.getColor() == "Black" and not self.is_whites_turn:
+            turn_color = "Black"
+        else:
+            print('Invalid: Wrong color piece for the current turn')
+            return 'Invalid'
+
+        if new_index in selected_piece.getMoves():
+            print(f'{selected_piece} Moved {original_index} to {new_index}')
+            temp = self._board_space[original_index]
+            self._board_space[original_index] = None
+            self._board_space[new_index] = temp
+            return 'Valid'
+        else:
+            print(f'Invalid: Must move a {turn_color} piece')
+            return 'Invalid'
+
+            
         
     def check_if_castling_blocked(self) -> list[bool]:
         """ 
@@ -171,6 +246,9 @@ class Board:
         black_queenside = [1,2,3]
 
         castling_squares_list = [white_kingside, white_queenside, black_kingside, black_queenside]
+
+        print(self.white_piece_vision())
+        print(self.black_piece_vision())
 
         white_vision = self.combine_lists(self.white_piece_vision())
         black_vision = self.combine_lists(self.black_piece_vision())
@@ -219,11 +297,42 @@ class Board:
 
     def check_for_no_remaining_moves(self) -> bool:
         """ Checks if no remaining moves are allowed, in tandem with check_for_checks, this can detect checkmate or stalemate """
-        pass
+        
+
+    def piece_vision(self):
+        if self.is_whites_turn:
+            for piece in self._black_pieces:
+                piece.unpin()
+            for position, piece in zip(self._white_piece_indices, self._white_pieces):
+                piece.updateVision(position, self)
+            for piece in self._white_pieces:
+                piece.unpin()
+            for position, piece in zip(self._black_piece_indices, self._black_pieces):
+                piece.updateVision(position, self)
+        else:
+            for piece in self._white_pieces:
+                piece.unpin()
+            for position, piece in zip(self._black_piece_indices, self._black_pieces):
+                piece.updateVision(position, self)
+            for piece in self._black_pieces:
+                piece.unpin()
+            for position, piece in zip(self._white_piece_indices, self._white_pieces):
+                piece.updateVision(position, self)
+
 
     def update_legal_moves(self):
         """ loops over pieces to update internal legal moves """
-        pass
+
+        for piece in self._white_pieces:
+            piece.visionToMoves()
+        for piece in self._black_pieces:
+            piece.visionToMoves()
+
+    def active_player_legal_moves(self):
+        if self.is_whites_turn:
+            return self.combine_lists([piece.getMoves() for piece in self._white_pieces])
+        else:
+            return self.combine_lists([piece.getMoves() for piece in self._black_pieces])
 
     def check_threefold_repeition(self) -> bool:
         """ Checks if position has been reached 3 times in a game, resulting in stalemate 
@@ -320,11 +429,11 @@ class Board:
 
     def white_piece_vision(self) -> list[list[int]]:
         """ returns 2d array of white pieces vision """
-        return [piece.getMoves() for piece in self._white_pieces]
+        return [piece.getVision() for piece in self._white_pieces]
 
     def black_piece_vision(self) -> list[list[int]]:
         """ returns 2d array of black pieces vision """
-        return [piece.getMoves() for piece in self._black_pieces]
+        return [piece.getVision() for piece in self._black_pieces]
 
     def __str__(self, with_chess_coords: bool = False) -> str:
         column_num = ['1', '2', '3', '4', '5', '6', '7', '8']
