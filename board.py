@@ -11,6 +11,7 @@ class BoardSizeError(Exception):
     pass
 
 class Board:
+
     def __init__(self, board_space: list[Piece], is_whites_turn: bool, castling_rights: list[bool], enpassant_sq: int, half_move_clock: int, full_move_number: int, past_positions : list[str] = None):
         """ 
             Variables : 
@@ -51,7 +52,6 @@ class Board:
             Pawn: 1,
             King: 999
         }
-
         self.refresh_board()
 
     def combine_lists(self, input_list : list[list[int]]) -> list[int]:
@@ -112,17 +112,14 @@ class Board:
                     self._black_pieces.append(piece)
                     self._black_score += self.PIECE_VALUES[type(piece)]
 
-        print(self._white_pieces)
-        print(self._black_pieces)
-
         for piece in self._white_pieces:
             piece.unpin()
-        for position, piece in zip(self._black_piece_indices, self._black_pieces):
-            piece.updateVision(position, self)
+        for piece in self._black_pieces:
+            piece.updateVision(self)
         for piece in self._black_pieces:
             piece.unpin()
-        for position, piece in zip(self._white_piece_indices, self._white_pieces):
-            piece.updateVision(position, self)
+        for piece in self._white_pieces:
+            piece.updateVision(self)
 
         # 3. Check for Checks
         enemy_sight_on_king = self.checks_on_active_king()
