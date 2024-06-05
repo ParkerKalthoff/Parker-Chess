@@ -141,8 +141,27 @@ def squareMoves(piece, position: int, board) -> list[int]:
 
     friendlyPieces, enemyPieces = getTeams(piece, board)
 
-    offsets = [-9, -8, -7, -1, 1, 7, 8, 9]
-    potentialMoves = [position + offset for offset in offsets if isValidPos(position + offset) and (position + offset) not in friendlyPieces]
+    # offsets = [-9, -8, -7, -1, 1, 7, 8, 9]
+    output = []
+
+    if not position // 8 == 0:
+        output += [-9, -8, -7]
+
+    if not position // 8 == 7:
+        output += [7, 8, 9]
+
+    if not position % 0 == 0:
+        output += [-9, -1, 7]
+
+    if not position % 0 == 0:
+        output += [-7, 1, 9]
+    
+    output = list(set(output))
+
+    if piece.getColor() == 'White':
+        potentialMoves = [index for index in output not in board.combine_lists(board.black_piece_vision())]
+    else:
+        potentialMoves = [index for index in output not in board.combine_lists(board.white_piece_vision())]
 
     return sorted(potentialMoves)
 
