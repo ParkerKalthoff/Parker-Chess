@@ -52,7 +52,8 @@ class Board:
             Pawn: 1,
             King: 999
         }
-        self.refresh_board()
+
+        self.refresh_board(initialRefresh=True)
 
     def combine_lists(self, input_list : list[list[int]]) -> list[int]:
         """ Returns a flat representation of a 2d array """
@@ -83,7 +84,7 @@ class Board:
     def get_turn(self) -> bool:
         return self.is_whites_turn
 
-    def refresh_board(self, InitialRefresh = False) -> int:
+    def refresh_board(self, initialRefresh = False) -> int:
         """ Refreshes internal board values after piece moves 
             >>> InitalRefresh is to not overwrite initial values set by the same, may remove
         """
@@ -111,6 +112,20 @@ class Board:
                     piece.setPos(index)
                     self._black_pieces.append(piece)
                     self._black_score += self.PIECE_VALUES[type(piece)]
+
+        if initialRefresh: # set castling rights and pos
+            for piece in self._white_pieces:
+                if isinstance(piece, Rook):
+                    if piece.pos() == 63:
+                        piece.setCastlingCondition(1,self.castling)
+                    if piece.pos() == 56:
+                        piece.setCastlingCondition(2,self.castling)
+            for piece in self._white_pieces:
+                if isinstance(piece, Rook):
+                    if piece.pos() == 7:
+                        piece.setCastlingCondition(3,self.castling)
+                    if piece.pos() == 0:
+                        piece.setCastlingCondition(4,self.castling)
 
 
         if self.is_whites_turn:
@@ -244,9 +259,11 @@ class Board:
 
         if new_index in selected_piece.getMoves():
             print(f'{selected_piece} Moved {original_index} to {new_index}')
-            temp = self._board_space[original_index]
+            temp = self._board_space[original_index] # piece ref, storing in var to 
             self._board_space[original_index] = None
             self._board_space[new_index] = temp
+            if isinstance(self._board_space[new_index], (King, Rook)):
+                self._board_space[new_index].disableCastling()
             return 'Valid'
         else:
             print(f'Invalid: Must move a {turn_color} piece')

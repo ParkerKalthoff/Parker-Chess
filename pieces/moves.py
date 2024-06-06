@@ -23,7 +23,7 @@ def enpassant(piece, position: int, board) -> list[int]:
     endSquare = position + (16 * direction)
     firstSquare = position + (8 * direction)
 
-    if not isValidPos(endSquare) or board.getSquare(firstSquare) or board.getSquare(endSquare):
+    if not isValidPos(endSquare) or board.get_square(firstSquare) or board.get_square(endSquare):
         return []
     return [endSquare]
 
@@ -33,7 +33,7 @@ def pawnForward(piece, position: int, board) -> list[int]:
     direction = -1 if piece.getColor() == "White" else 1
     firstSquare = position + (8 * direction)
 
-    if not isValidPos(firstSquare) or board.getSquare(firstSquare):
+    if not isValidPos(firstSquare) or board.get_square(firstSquare):
         return []
     return [firstSquare]
 
@@ -46,7 +46,7 @@ def pawnTake(piece, position: int, board) -> list[int]:
     moveset = []
 
     if isValidPos(rightSquare):
-        targetPiece = board.getSquare(rightSquare)
+        targetPiece = board.get_square(rightSquare)
         if targetPiece and x_Pos(rightSquare) == x_Pos(position) + 1 and piece.getColor() != targetPiece.getColor():
             moveset.append(rightSquare)
 
@@ -54,7 +54,7 @@ def pawnTake(piece, position: int, board) -> list[int]:
                     moveset.append(rightSquare)
 
     if isValidPos(leftSquare):
-        targetPiece = board.getSquare(leftSquare)
+        targetPiece = board.get_square(leftSquare)
         if targetPiece and x_Pos(leftSquare) == x_Pos(position) - 1 and piece.getColor() != targetPiece.getColor():
             moveset.append(leftSquare)
 
@@ -85,7 +85,7 @@ def straight(piece, position: int, board) -> list[int]:
                 break
             if mySquare in enemyPieces:
                 current_line_of_sight.append(mySquare)
-                targetPiece = board.getSquare(mySquare)
+                targetPiece = board.get_square(mySquare)
                 if targetPiece.getType() == "King" and targetPiece.getColor() != piece.getColor():
                     foundEnemyKing = True
                 break
@@ -119,7 +119,7 @@ def diagonals(piece, position: int, board) -> list[int]:
                 break
             if mySquare in enemyPieces:
                 current_line_of_sight.append(mySquare)
-                targetPiece = board.getSquare(mySquare)
+                targetPiece = board.get_square(mySquare)
                 if targetPiece.getType() == "King" and targetPiece.getColor() != piece.getColor():
                     foundEnemyKing = True
                 break
@@ -144,26 +144,43 @@ def squareMoves(piece, position: int, board) -> list[int]:
     # offsets = [-9, -8, -7, 
     #            -1, |K|  1, 
     #             7,  8,  9]
-    output = []
+    output = [-9, -8, -7, -1, 1, 7, 8, 9]
 
-    if not position // 8 == 0: # top of the board
-        output += [-9, -8, -7]
+    if position // 8 == 0: # top of the board
+        for i in [-9, -8, -7]:
+            try:
+                output.remove(i)
+            except ValueError:
+                continue
 
-    if not position // 8 == 7: # bottom
-        output += [7, 8, 9]
+    if position // 8 == 7: # bottom
+        for i in [7, 8, 9]:
+            try:
+                output.remove(i)
+            except ValueError:
+                continue
 
     if not position % 8 == 0:  # right side of board
-        output += [-9, -1, 7]
+        for i in [-9, -1, 7]:
+            try:
+                output.remove(i)
+            except ValueError:
+                continue
 
     if not position % 8 == 7:  # left side of board 
-        output += [-7, 1, 9]
-    
-    output = list(set(output)) # clear dupes
+        for i in [-7, 1, 9]:
+            try:
+                output.remove(i)
+            except ValueError:
+                continue
 
     if piece.getColor() == 'White':
-        potentialMoves = [index for index in output if index not in board.combine_lists(board.black_piece_vision())]
+        potentialMoves = [index + position for index in output if index + position not in board.combine_lists(board.black_piece_vision()) or index + position not in board.white_piece_indices()]
     else:
-        potentialMoves = [index for index in output if index not in board.combine_lists(board.white_piece_vision())]
+        potentialMoves = [index + position for index in output if index + position not in board.combine_lists(board.white_piece_vision()) or index + position not in board.black_piece_indices()]
+
+    print(board.white_piece_indices(), 'White')
+    print(board.black_piece_indices(), 'Black')
 
     return sorted(potentialMoves)
 

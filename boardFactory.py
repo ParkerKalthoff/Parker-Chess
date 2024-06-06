@@ -96,21 +96,24 @@ def parse_castling_rights(castling_string: str) -> list[bool]:
 
 def charToPiece(char: str) -> Piece:
     """Converts a FEN character to a list containing the corresponding Piece or None."""
-    piece_dict = {
-        'P': Pawn,
-        'B': Bishop,
-        'R': Rook,
-        'N': Knight,
-        'Q': Queen,
-        'K': King
-    }
     
     if char.isdigit():
         return [None] * int(char)
 
     color = 'White' if char.isupper() else 'Black'
-    piece_type = piece_dict[char.upper()]
-    return [piece_type(color)]
+    
+    if char.upper() == 'P':
+        return [Pawn(color)]
+    if char.upper() == 'K':
+        return [King(color)]
+    if char.upper() == 'Q':
+        return [Queen(color)]
+    if char.upper() == 'R':
+        return [Rook(color)]
+    if char.upper() == 'N':
+        return [Knight(color)]
+    if char.upper() == 'B':
+        return [Bishop(color)]
 
 if __name__ == "__main__":
     try:
