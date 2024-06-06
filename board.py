@@ -79,7 +79,7 @@ class Board:
 
     def get_score(self) -> int:
         return self.white_score() - self.black_score()
-
+    
     def get_turn(self) -> bool:
         return self.is_whites_turn
 
@@ -112,14 +112,38 @@ class Board:
                     self._black_pieces.append(piece)
                     self._black_score += self.PIECE_VALUES[type(piece)]
 
-        for piece in self._white_pieces:
-            piece.unpin()
-        for piece in self._black_pieces:
-            piece.updateVision(self)
-        for piece in self._black_pieces:
-            piece.unpin()
-        for piece in self._white_pieces:
-            piece.updateVision(self)
+
+        if self.is_whites_turn:
+            for piece in self._black_pieces:
+                piece.unpin()
+            for piece in self._white_pieces:
+                 if not isinstance(piece, King):
+                    piece.updateVision(self)
+            for piece in self._white_pieces:
+                piece.unpin()
+            for piece in self._black_pieces:
+                 if not isinstance(piece, King):
+                    piece.updateVision(self)
+            [piece for piece in self._black_pieces if isinstance(piece, King)][0].updateVision(self)
+            [piece for piece in self._white_pieces if isinstance(piece, King)][0].updateVision(self)
+        else:
+            for piece in self._white_pieces:
+                piece.unpin()
+            for piece in self._black_pieces:
+                 if not isinstance(piece, King):
+                    piece.updateVision(self)
+            for piece in self._black_pieces:
+                piece.unpin()
+            for piece in self._white_pieces:
+                 if not isinstance(piece, King):
+                    piece.updateVision(self)
+            [piece for piece in self._black_pieces if isinstance(piece, King)][0].updateVision(self)
+            [piece for piece in self._white_pieces if isinstance(piece, King)][0].updateVision(self)
+
+        a = [piece for piece in self._black_pieces if isinstance(piece, King)][0]
+        b = [piece for piece in self._white_pieces if isinstance(piece, King)][0]
+        print(f"{a} , {a.getVision()} , {a.pos()}")
+        print(f"{b} , {b.getVision()} , {b.pos()}")
 
         # 3. Check for Checks
         enemy_sight_on_king = self.checks_on_active_king()
@@ -243,9 +267,6 @@ class Board:
         black_queenside = [1,2,3]
 
         castling_squares_list = [white_kingside, white_queenside, black_kingside, black_queenside]
-
-        print(self.white_piece_vision())
-        print(self.black_piece_vision())
 
         white_vision = self.combine_lists(self.white_piece_vision())
         black_vision = self.combine_lists(self.black_piece_vision())
