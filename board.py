@@ -67,10 +67,10 @@ class Board:
             self.full_move_number += 1
 
     def white_piece_indices(self) -> list[int]:
-        return self._white_piece_indices
+        return [piece.pos() for piece in self._white_pieces]
 
     def black_piece_indices(self) -> list[int]:
-        return self._black_piece_indices
+        return [piece.pos() for piece in self._black_pieces]
 
     def white_score(self) -> int:
         return self._white_score

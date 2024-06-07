@@ -2,8 +2,8 @@ from util import isValidPos, x_Pos, y_Pos, xy_Pos
 
 def getTeams(piece, board) -> tuple[list[int], list[int]]:
     if piece.getColor() == "White":
-        return board._white_piece_indices, board._black_piece_indices
-    return board._black_piece_indices, board._white_piece_indices
+        return board.white_piece_indices(), board.black_piece_indices()
+    return board.black_piece_indices(), board.white_piece_indices()
 
 # -----  -----  -----  -----  -----  -----  -----
 
@@ -13,7 +13,6 @@ def pawnMove(piece, position: int, board) -> list[int]:
     moveset = (pawnForward(piece, position, board) +
                enpassant(piece, position, board) +
                pawnTake(piece, position, board))
-    #print(pawnForward(piece, position, board), 'pf', enpassant(piece, position, board), 'ep', pawnTake(piece, position, board), 'pt')
     return sorted(moveset)
 
 def enpassant(piece, position: int, board) -> list[int]:
@@ -89,6 +88,7 @@ def straight(piece, position: int, board) -> list[int]:
                 targetPiece = board.get_square(mySquare)
                 if targetPiece.getType() == "King" and targetPiece.getColor() != piece.getColor():
                     foundEnemyKing = True
+                result.append(mySquare)
                 break
             result.append(mySquare)
             current_line_of_sight.append(mySquare)
@@ -121,8 +121,9 @@ def diagonals(piece, position: int, board) -> list[int]:
             if mySquare in enemyPieces:
                 current_line_of_sight.append(mySquare)
                 targetPiece = board.get_square(mySquare)
-                if targetPiece.getType() == "King" and targetPiece.getColor() != piece.getColor():
+                if targetPiece.toChar().upper() != 'K' and targetPiece.getColor() != piece.getColor():
                     foundEnemyKing = True
+                result.append(mySquare)
                 break
             result.append(mySquare)
             current_line_of_sight.append(mySquare)
