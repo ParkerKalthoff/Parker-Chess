@@ -113,6 +113,15 @@ class Board:
                     self._black_pieces.append(piece)
                     self._black_score += self.PIECE_VALUES[type(piece)]
 
+
+        self.piece_vision()
+
+
+        a = [piece for piece in self._black_pieces if isinstance(piece, King)][0]
+        b = [piece for piece in self._white_pieces if isinstance(piece, King)][0]
+        print(f"{a} , {a.getVision()} , {a.pos()}")
+        print(f"{b} , {b.getVision()} , {b.pos()}")
+
         if initialRefresh: # set castling rights and pos
             for piece in self._white_pieces:
                 if isinstance(piece, Rook):
@@ -126,39 +135,6 @@ class Board:
                         piece.setCastlingCondition(3,self.castling)
                     if piece.pos() == 0:
                         piece.setCastlingCondition(4,self.castling)
-
-
-        if self.is_whites_turn:
-            for piece in self._black_pieces:
-                piece.unpin()
-            for piece in self._white_pieces:
-                 if not isinstance(piece, King):
-                    piece.updateVision(self)
-            for piece in self._white_pieces:
-                piece.unpin()
-            for piece in self._black_pieces:
-                 if not isinstance(piece, King):
-                    piece.updateVision(self)
-            [piece for piece in self._black_pieces if isinstance(piece, King)][0].updateVision(self)
-            [piece for piece in self._white_pieces if isinstance(piece, King)][0].updateVision(self)
-        else:
-            for piece in self._white_pieces:
-                piece.unpin()
-            for piece in self._black_pieces:
-                 if not isinstance(piece, King):
-                    piece.updateVision(self)
-            for piece in self._black_pieces:
-                piece.unpin()
-            for piece in self._white_pieces:
-                 if not isinstance(piece, King):
-                    piece.updateVision(self)
-            [piece for piece in self._black_pieces if isinstance(piece, King)][0].updateVision(self)
-            [piece for piece in self._white_pieces if isinstance(piece, King)][0].updateVision(self)
-
-        a = [piece for piece in self._black_pieces if isinstance(piece, King)][0]
-        b = [piece for piece in self._white_pieces if isinstance(piece, King)][0]
-        print(f"{a} , {a.getVision()} , {a.pos()}")
-        print(f"{b} , {b.getVision()} , {b.pos()}")
 
         # 3. Check for Checks
         enemy_sight_on_king = self.checks_on_active_king()
@@ -180,6 +156,8 @@ class Board:
         allowed_castles = self.check_if_castling_blocked()
 
         self.update_legal_moves()
+        print('ulm')
+
 
         if not self._inCheck:
             if self.is_whites_turn:
@@ -338,21 +316,29 @@ class Board:
         if self.is_whites_turn:
             for piece in self._black_pieces:
                 piece.unpin()
-            for position, piece in zip(self._white_piece_indices, self._white_pieces):
-                piece.updateVision(position, self)
+            for piece in self._white_pieces:
+                if not isinstance(piece, King):
+                    piece.updateVision(self)
             for piece in self._white_pieces:
                 piece.unpin()
-            for position, piece in zip(self._black_piece_indices, self._black_pieces):
-                piece.updateVision(position, self)
+            for piece in self._black_pieces:
+                if not isinstance(piece, King):
+                    piece.updateVision(self)
+            [piece for piece in self._black_pieces if isinstance(piece, King)][0].updateVision(self)
+            [piece for piece in self._white_pieces if isinstance(piece, King)][0].updateVision(self)
         else:
             for piece in self._white_pieces:
                 piece.unpin()
-            for position, piece in zip(self._black_piece_indices, self._black_pieces):
-                piece.updateVision(position, self)
+            for piece in self._black_pieces:
+                if not isinstance(piece, King):
+                    piece.updateVision(self)
             for piece in self._black_pieces:
                 piece.unpin()
-            for position, piece in zip(self._white_piece_indices, self._white_pieces):
-                piece.updateVision(position, self)
+            for piece in self._white_pieces:
+                if not isinstance(piece, King):
+                    piece.updateVision(self)
+            [piece for piece in self._black_pieces if isinstance(piece, King)][0].updateVision(self)
+            [piece for piece in self._white_pieces if isinstance(piece, King)][0].updateVision(self)
 
 
     def update_legal_moves(self):
@@ -445,11 +431,20 @@ class Board:
             enpassant_string = '-'
         return f'{board_string} {turn_string} {castling_rights} {enpassant_string} {self.half_move_clock} {self.full_move_number}'
 
-    def coordToInt(coord: str) -> int:
-        return (ord(coord[0].lower()) - 97) * 8 + int(coord[1]) - 1
+    def intToCoord(self, index):
+        if not (0 <= index <= 63):
+            raise ValueError("Index must be in the range 0-63.")
+        file = chr(ord('a') + (index % 8))
+        rank = str((index // 8) + 1)
+        return file + rank
 
-    def intToCoord(integer: int) -> str:
-        return f'{chr((integer % 8) + 97)}{(integer // 8) + 1}'
+    def coordToInt(self, coord):
+        if len(coord) != 2 or coord[0] not in 'abcdefgh' or coord[1] not in '12345678':
+            raise ValueError("Coordinate must be in the format 'a1' to 'h8'.")
+        file = coord[0]
+        rank = coord[1]
+        index = (ord(file) - ord('a')) + (int(rank) - 1) * 8
+        return index
 
     def piece_moves(self, position: int) -> list[int]:
         piece = self._board_space[position]

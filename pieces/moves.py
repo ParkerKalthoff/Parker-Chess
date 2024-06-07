@@ -13,6 +13,7 @@ def pawnMove(piece, position: int, board) -> list[int]:
     moveset = (pawnForward(piece, position, board) +
                enpassant(piece, position, board) +
                pawnTake(piece, position, board))
+    #print(pawnForward(piece, position, board), 'pf', enpassant(piece, position, board), 'ep', pawnTake(piece, position, board), 'pt')
     return sorted(moveset)
 
 def enpassant(piece, position: int, board) -> list[int]:
@@ -160,14 +161,14 @@ def squareMoves(piece, position: int, board) -> list[int]:
             except ValueError:
                 continue
 
-    if not position % 8 == 0:  # right side of board
+    if position % 8 == 0:  # right side of board
         for i in [-9, -1, 7]:
             try:
                 output.remove(i)
             except ValueError:
                 continue
 
-    if not position % 8 == 7:  # left side of board 
+    if position % 8 == 7:  # left side of board 
         for i in [-7, 1, 9]:
             try:
                 output.remove(i)
@@ -177,10 +178,8 @@ def squareMoves(piece, position: int, board) -> list[int]:
     if piece.getColor() == 'White':
         potentialMoves = [index + position for index in output if index + position not in board.combine_lists(board.black_piece_vision()) or index + position not in board.white_piece_indices()]
     else:
-        potentialMoves = [index + position for index in output if index + position not in board.combine_lists(board.white_piece_vision()) or index + position not in board.black_piece_indices()]
+        potentialMoves = [index + position for index in output if index + position not in board.combine_lists(board.white_piece_vision())]
 
-    print(board.white_piece_indices(), 'White')
-    print(board.black_piece_indices(), 'Black')
 
     return sorted(potentialMoves)
 
