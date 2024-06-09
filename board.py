@@ -242,6 +242,9 @@ class Board:
             self._board_space[new_index] = temp
             if isinstance(self._board_space[new_index], (King, Rook)):
                 self._board_space[new_index].disableCastling()
+            if isinstance(self._board_space[new_index], Pawn) and self._board_space[new_index].__canEnpassant__:
+                self.enpassant_square = self._board_space[new_index].pos() -  8 if self._board_space[new_index].getColor() == 'White' else -8
+                self._board_space[new_index].__canEnpassant__ = False
             return 'Valid'
         else:
             print(f'Invalid: Must move a {turn_color} piece')
