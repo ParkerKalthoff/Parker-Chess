@@ -55,6 +55,14 @@ class Board:
 
         self.refresh_board(initialRefresh=True)
 
+    def print_active_moves(self):
+        if self.is_whites_turn:
+            for piece in self._white_pieces:
+                print(self.intToCoord(piece.pos()), piece, [self.intToCoord(move) for move in piece.getMoves()])
+        else:
+            for piece in self._black_pieces:
+                print(self.intToCoord(piece.pos()), piece, [self.intToCoord(move) for move in piece.getMoves()])
+
     def combine_lists(self, input_list : list[list[int]]) -> list[int]:
         """ Returns a flat representation of a 2d array """
         return [item for list in input_list for item in list]
@@ -156,8 +164,6 @@ class Board:
         allowed_castles = self.check_if_castling_blocked()
 
         self.update_legal_moves()
-        print('ulm')
-
 
         if not self._inCheck:
             if self.is_whites_turn:
@@ -183,7 +189,10 @@ class Board:
             print('Stalemate!')
 
     def movePiece(self, original_index : str, new_index : str) -> str:
-        """ Returns 'Valid' or 'Invalid' and updates board state """
+        """ Pass in Starting and ending coords (A1, A2)
+        Returns 'Valid' or 'Invalid' and updates board state
+        """
+
         original_index = self.coordToInt(original_index)
 
         if new_index not in ['O-O-O', 'O-O']: # checks if move is a castle move
@@ -237,14 +246,17 @@ class Board:
 
         if new_index in selected_piece.getMoves():
             print(f'{selected_piece} Moved {original_index} to {new_index}')
-            temp = self._board_space[original_index] # piece ref, storing in var to 
+            moving_piece = self._board_space[original_index] # piece ref, storing in var to poop
             self._board_space[original_index] = None
-            self._board_space[new_index] = temp
-            if isinstance(self._board_space[new_index], (King, Rook)):
-                self._board_space[new_index].disableCastling()
-            if isinstance(self._board_space[new_index], Pawn) and self._board_space[new_index].__canEnpassant__:
-                self.enpassant_square = self._board_space[new_index].pos() -  8 if self._board_space[new_index].getColor() == 'White' else -8
-                self._board_space[new_index].__canEnpassant__ = False
+            self._board_space[new_index] = moving_piece
+            if isinstance(moving_piece, (King, Rook)): # either king or rook disabling castling
+                moving_piece.disableCastling()
+            if isinstance(moving_piece, Pawn): # special rules pawns
+                if moving_piece.__canEnpassant__: # If pawn can enpassant
+                    if abs(original_index - new_index) == 16: # if pawn enpassants
+                        self.enpassant_square = new_index
+                    moving_piece.__canEnpassant__ = False # otherwise disable enpassant
+                    self._board_space[new_index + (8 if moving_piece.getColor() == 'White' else -8)] = None # otherwise checking if pawn takes piece by enpassant, having to remove a pawn thats a rank higher
             return 'Valid'
         else:
             print(f'Invalid: Must move a {turn_color} piece')
@@ -487,6 +499,6 @@ class Board:
         return output_str
 
     def display_board(self) -> str:
-        return self.__str__(with_chess_coords=True)
+        print(self.__str__(with_chess_coords=True))
 
 

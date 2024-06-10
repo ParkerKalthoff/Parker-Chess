@@ -4,7 +4,9 @@ import boardFactory
 
 b = boardFactory.defaultBoard()
 
-print(b.display_board())
+b.display_board()
 
-for piece in b._white_pieces:
-    print(b.intToCoord(piece.pos()), piece, [b.intToCoord(move) for move in piece.getMoves()])
+b.print_active_moves()
+
+
+# strange issue with king, Not first getting vision and then converting to moves 
