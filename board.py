@@ -33,9 +33,6 @@ class Board:
 
         self.past_positions = past_positions if past_positions else [] # game move history
 
-        self._white_piece_indices = []
-        self._black_piece_indices = []
-
         self._white_pieces = []
         self._black_pieces = []
 
@@ -92,7 +89,7 @@ class Board:
     def get_turn(self) -> bool:
         return self.is_whites_turn
 
-    def refresh_board(self, initialRefresh = False) -> int:
+    def refresh_board(self, initialRefresh=False) -> int:
         """ Refreshes internal board values after piece moves 
             >>> InitalRefresh is to not overwrite initial values set by the same, may remove
         """
@@ -100,8 +97,6 @@ class Board:
         if len(self._board_space) > 64:
             raise BoardSizeError("Board size exceeds 64 squares.")
 
-        self._white_piece_indices = []
-        self._black_piece_indices = []
         self._white_pieces = []
         self._black_pieces = []
 
@@ -116,77 +111,78 @@ class Board:
                     piece.setPos(index)
                     self._white_pieces.append(piece)
                     self._white_score += self.PIECE_VALUES[type(piece)]
-                else: # piece.getColor() == 'Black'
+                else:  # piece.getColor() == 'Black'
                     piece.setPos(index)
                     self._black_pieces.append(piece)
                     self._black_score += self.PIECE_VALUES[type(piece)]
 
-
         self.piece_vision()
 
-
-        a = [piece for piece in self._black_pieces if isinstance(piece, King)][0]
-        b = [piece for piece in self._white_pieces if isinstance(piece, King)][0]
-        print(f"{a} , {a.getVision()} , {a.pos()}")
-        print(f"{b} , {b.getVision()} , {b.pos()}")
-
-        if initialRefresh: # set castling rights and pos
+        if initialRefresh:  # set castling rights and pos
             for piece in self._white_pieces:
                 if isinstance(piece, Rook):
                     if piece.pos() == 63:
-                        piece.setCastlingCondition(1,self.castling)
+                        piece.setCastlingCondition(1, self.castling)
                     if piece.pos() == 56:
-                        piece.setCastlingCondition(2,self.castling)
-            for piece in self._white_pieces:
+                        piece.setCastlingCondition(2, self.castling)
+            for piece in self._black_pieces:
                 if isinstance(piece, Rook):
                     if piece.pos() == 7:
-                        piece.setCastlingCondition(3,self.castling)
+                        piece.setCastlingCondition(3, self.castling)
                     if piece.pos() == 0:
-                        piece.setCastlingCondition(4,self.castling)
+                        piece.setCastlingCondition(4, self.castling)
 
-        # 3. Check for Checks
+        # Check for Checks
         enemy_sight_on_king = self.checks_on_active_king()
 
-        if enemy_sight_on_king: # using to make code more readible, enemy_sight_on_king is either [] or [[1,2,3]] or [[1,2,3], [1,2]]
+        if enemy_sight_on_king:  # using to make code more readable, enemy_sight_on_king is either [] or [[1,2,3]] or [[1,2,3], [1,2]]
             print('Check!')
             self._inCheck = True
 
-        if self._inCheck: # culls non check preventing moves from other pieces
-            if self.is_whites_turn: # if white is active player
+        if self._inCheck:  # culls non check preventing moves from other pieces
+            if self.is_whites_turn:  # if white is active player
                 for piece in self._white_pieces:
                     if not isinstance(piece, King):
                         piece.movesPreventingCheck(enemy_sight_on_king)
-            else: # if black is active 
+            else:  # if black is active
                 for piece in self._black_pieces:
                     if not isinstance(piece, King):
                         piece.movesPreventingCheck(enemy_sight_on_king)
 
-        allowed_castles = self.check_if_castling_blocked()
-
+        # Update Legal Moves
         self.update_legal_moves()
 
+        allowed_castles = self.check_if_castling_blocked()
         if not self._inCheck:
             if self.is_whites_turn:
                 for piece in self._white_pieces:
                     if isinstance(piece, King):
                         if allowed_castles[0]:
-                            piece.valid_moves.append('O-O')    
+                            piece.valid_moves.append('O-O')
                         if allowed_castles[1]:
-                            piece.valid_moves.append('O-O-O')  
+                            piece.valid_moves.append('O-O-O')
             else:
                 for piece in self._black_pieces:
                     if isinstance(piece, King):
                         if allowed_castles[2]:
-                            piece.valid_moves.append('O-O')    
+                            piece.valid_moves.append('O-O')
                         if allowed_castles[3]:
-                            piece.valid_moves.append('O-O-O')  
-                        
-        # 4. Check for Checkmates or Stalemates
+                            piece.valid_moves.append('O-O-O')
 
-        if not self.active_player_legal_moves():
-            if self._inCheck:
-                print('Checkmate!')
-            print('Stalemate!')
+        # Check for Checkmates or Stalemates
+            if not self.active_player_legal_moves():
+                if self._inCheck:
+                    print('Checkmate!')
+                else:
+                    print('Stalemate!')
+
+        # Switch Player Turn
+        self.next_turn()
+
+        # Update Move History
+        self.past_positions.append(self.to_FEN())
+
+
 
     def movePiece(self, original_index : str, new_index : str) -> str:
         """ Pass in Starting and ending coords (A1, A2)
@@ -359,10 +355,12 @@ class Board:
     def update_legal_moves(self):
         """ loops over pieces to update internal legal moves """
 
-        for piece in self._white_pieces:
-            piece.visionToMoves()
-        for piece in self._black_pieces:
-            piece.visionToMoves()
+        if self.is_whites_turn:
+            for piece in self._white_pieces:
+                piece.visionToMoves()
+        else:
+            for piece in self._black_pieces:
+                piece.visionToMoves()
 
     def active_player_legal_moves(self):
         if self.is_whites_turn:

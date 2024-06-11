@@ -36,3 +36,9 @@ class King(Piece):
     def updateVision(self, board):
         self._pieceVision = squareMoves(self, self.pos(), board)
 
+    #override
+    def visionToMoves(self, board):
+        if self.getColor() == 'White':
+            self.valid_moves = [move for move in self._pieceVision if move not in board.white_piece_indices() and move not in board.combine_lists(board.black_piece_vision())]
+        else:
+            self.valid_moves = [move for move in self._pieceVision if move not in board.black_piece_indices() and move not in board.combine_lists(board.white_piece_vision())]

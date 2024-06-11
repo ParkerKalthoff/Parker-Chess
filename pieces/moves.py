@@ -176,13 +176,7 @@ def squareMoves(piece, position: int, board) -> list[int]:
             except ValueError:
                 continue
 
-    if piece.getColor() == 'White':
-        potentialMoves = [index + position for index in output if (index + position not in board.combine_lists(board.black_piece_vision()) and (index + position) not in board._white_piece_indices)]
-    else:
-        potentialMoves = [index + position for index in output if (index + position not in board.combine_lists(board.white_piece_vision()) and (index + position) not in board._black_piece_indices)]
-
-
-    return sorted(potentialMoves)
+    return sorted([index + position for index in output])
 
 # -----  -----  -----  -----  -----  -----  -----
 
