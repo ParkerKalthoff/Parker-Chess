@@ -176,15 +176,12 @@ class Board:
                 else:
                     print('Stalemate!')
 
-        # Switch Player Turn
-        self.next_turn()
-
         # Update Move History
         self.past_positions.append(self.to_FEN())
 
 
 
-    def movePiece(self, original_index : str, new_index : str) -> str:
+    def movePiece(self, original_index : str, new_index : str) -> None:
         """ Pass in Starting and ending coords (A1, A2)
         Returns 'Valid' or 'Invalid' and updates board state
         """
@@ -220,8 +217,6 @@ class Board:
                         self._board_space[5] = self._board_space[7]
                         self._board_space[4] = None
                         self._board_space[7] = None
-
-
         # Normal Move
 
         if not self.get_square(original_index):
@@ -250,9 +245,10 @@ class Board:
             if isinstance(moving_piece, Pawn): # special rules pawns
                 if moving_piece.__canEnpassant__: # If pawn can enpassant
                     if abs(original_index - new_index) == 16: # if pawn enpassants
-                        self.enpassant_square = new_index
+                        self.enpassant_square = new_index - (-8 if moving_piece.getColor() == 'White' else 8)
                     moving_piece.__canEnpassant__ = False # otherwise disable enpassant
-                    self._board_space[new_index + (8 if moving_piece.getColor() == 'White' else -8)] = None # otherwise checking if pawn takes piece by enpassant, having to remove a pawn thats a rank higher
+                self._board_space[new_index + (8 if moving_piece.getColor() == 'White' else -8)] = None # otherwise checking if pawn takes piece by enpassant, having to remove a pawn thats a rank higher
+            self.next_turn()
             return 'Valid'
         else:
             print(f'Invalid: Must move a {turn_color} piece')
@@ -357,10 +353,16 @@ class Board:
 
         if self.is_whites_turn:
             for piece in self._white_pieces:
-                piece.visionToMoves()
+                if isinstance(piece, (Pawn, King)):
+                    piece.visionToMoves(self)
+                else:
+                    piece.visionToMoves()
         else:
             for piece in self._black_pieces:
-                piece.visionToMoves()
+                if isinstance(piece, (Pawn, King)):
+                    piece.visionToMoves(self)
+                else:
+                    piece.visionToMoves()
 
     def active_player_legal_moves(self):
         if self.is_whites_turn:
@@ -446,9 +448,9 @@ class Board:
 
     def intToCoord(self, index):
         if not (0 <= index <= 63):
-            raise ValueError("Index must be in the range 0-63.")
+            raise ValueError(f"Index must be in the range 0-63. Index was value : {index}")
         file = chr(ord('a') + (index % 8))
-        rank = str((index // 8) + 1)
+        rank = str(8 - (index // 8))
         return file + rank
 
     def coordToInt(self, coord):
@@ -456,8 +458,9 @@ class Board:
             raise ValueError("Coordinate must be in the format 'a1' to 'h8'.")
         file = coord[0]
         rank = coord[1]
-        index = (ord(file) - ord('a')) + (int(rank) - 1) * 8
+        index = (ord(file) - ord('a')) + (8 - int(rank)) * 8
         return index
+
 
     def piece_moves(self, position: int) -> list[int]:
         piece = self._board_space[position]
@@ -479,7 +482,7 @@ class Board:
         return [piece.getVision() for piece in self._black_pieces]
 
     def __str__(self, with_chess_coords: bool = False) -> str:
-        column_num = ['1', '2', '3', '4', '5', '6', '7', '8']
+        column_num = ['8', '7', '6', '5', '4', '3', '2', '1']
         output_str = " _______________________________________\n"
         if with_chess_coords:
             output_str = "  " + output_str
@@ -493,7 +496,7 @@ class Board:
             output_str += row_str + "\n"
         if with_chess_coords:
             output_str += "     a    b    c    d    e    f    g    h"
-            output_str += f"\n Score : {self.get_score()}, Active turn : {'w' if self.is_whites_turn else 'b'}, Turn : {self.full_move_number}"
+            output_str += f"\n Score : {self.get_score()}, Active turn : {'w' if self.is_whites_turn else 'b'}, Turn : {self.full_move_number}, ep square"
         return output_str
 
     def display_board(self) -> str:

@@ -86,7 +86,7 @@ def straight(piece, position: int, board) -> list[int]:
             if mySquare in enemyPieces:
                 current_line_of_sight.append(mySquare)
                 targetPiece = board.get_square(mySquare)
-                if targetPiece.getType() == "King" and targetPiece.getColor() != piece.getColor():
+                if targetPiece.toChar().upper() == "K" and targetPiece.getColor() != piece.getColor():
                     foundEnemyKing = True
                 result.append(mySquare)
                 break

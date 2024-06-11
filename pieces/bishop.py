@@ -15,6 +15,12 @@ class Bishop(Piece):
         else: 
             return '♗' # B
 
+    def toChar(self):
+        if super().getColor() == "White":
+            return 'B'
+        else:
+            return 'b'
+
     #override
     def updateVision(self, board) -> list[int]:
         self._pieceVision = diagonals(self, self.pos(), board)
