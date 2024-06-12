@@ -4,20 +4,21 @@ import boardFactory
 
 b = boardFactory.defaultBoard()
 
-b.movePiece('d2', 'd4')
+b.movePiece('d2','d4')
 b.refresh_board()
 
-b.movePiece('e7', 'e5')
+b.movePiece('d7','d5')
 b.refresh_board()
 
-b.movePiece('e2', 'e3')
+b.movePiece('e2','e4')
 b.refresh_board()
 
-b.movePiece('d7', 'd5')
+b.movePiece('e7','e5')
 b.refresh_board()
 
-b.movePiece('f1', 'b5')
+b.movePiece('f1','b5')
 b.refresh_board()
+
 
 # 
 

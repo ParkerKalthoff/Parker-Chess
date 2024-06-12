@@ -307,20 +307,29 @@ class Board:
         if self.is_whites_turn:
             # White is currently active player
             activePlayersKing = [piece for piece in self._white_pieces if isinstance(piece, King)][0]
-            previousPlayerVision = self.black_piece_vision()
+            previousPlayerPieces = self._black_pieces
         else: 
             # Black is currently active player
             activePlayersKing = [piece for piece in self._black_pieces if isinstance(piece, King)][0]
-            previousPlayerVision = self.white_piece_vision()
+            previousPlayerPieces = [piece for piece in self._white_pieces]
 
-        enemy_line_of_sight_on_king = [pieceVision for pieceVision in previousPlayerVision if activePlayersKing.pos() in pieceVision]
+        enemies_attacking_king = [piece for piece in previousPlayerPieces if activePlayersKing.pos() in piece.getVision()]
+        
+        enemy_line_of_sight_on_king = []
+        for piece in enemies_attacking_king:
+            if isinstance(piece, (Knight, Pawn)):
+                print([activePlayersKing.pos(), piece.pos()])
+                enemy_line_of_sight_on_king.append([activePlayersKing.pos(), piece.pos()])
+            else:
+                print(piece.kingsight + [piece.pos()])
+                enemy_line_of_sight_on_king.append(piece.kingsight + [piece.pos()])
+
         # this is the vision lines of the enemy on active players king, this will be used to detect double checks
 
         return enemy_line_of_sight_on_king
 
     def check_for_no_remaining_moves(self) -> bool:
         """ Checks if no remaining moves are allowed, in tandem with check_for_checks, this can detect checkmate or stalemate """
-        
 
     def piece_vision(self):
         if self.is_whites_turn:
@@ -487,7 +496,7 @@ class Board:
 
     def __str__(self, with_chess_coords: bool = False) -> str:
         column_num = ['8', '7', '6', '5', '4', '3', '2', '1']
-        output_str = " _______________________________________\n"
+        output_str = " _______________________________\n"
         if with_chess_coords:
             output_str = "  " + output_str
         for row in range(8):
@@ -496,10 +505,10 @@ class Board:
                 row_str = column_num[row] + "-" + row_str
             for col in range(8):
                 piece = self._board_space[row * 8 + col]
-                row_str += f"{'_' + piece.__str__() +'__' if piece else '____'}|"
+                row_str += f"{'_' + piece.__str__() +'_' if piece else '___'}|"
             output_str += row_str + "\n"
         if with_chess_coords:
-            output_str += "     a    b    c    d    e    f    g    h"
+            output_str += "    a   b   c   d   e   f   g   h"
             output_str += f"\n Score : {self.get_score()}, Active turn : {'w' if self.is_whites_turn else 'b'}, Turn : {self.full_move_number}, ep square"
         return output_str
 

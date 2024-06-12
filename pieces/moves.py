@@ -88,18 +88,18 @@ def straight(piece, position: int, board):
             if mySquare in enemyPieces:
                 current_line_of_sight.append(mySquare)
                 targetPiece = board.get_square(mySquare)
-                if targetPiece.toChar().upper() == "K" and targetPiece.getColor() != piece.getColor():
-                    foundEnemyKing = True
-                    line_of_sight_to_king = current_line_of_sight[:]
+                if targetPiece.toChar().upper() == "K" and targetPiece.getColor() != piece.getColor():#                    __  _   _
+                    foundEnemyKing = True#                                           /\  / / /\  /   / /\        /\  /\   / / / / /_  
+                    line_of_sight_to_king = current_line_of_sight[:] # shallow copy /  \/ / /  \/ __/ /  \      /  \/  \ /_/ /_/ /_
                 result.append(mySquare)
                 break
             result.append(mySquare)
-            current_line_of_sight.append(mySquare)
+            current_line_of_sight.append(mySquare) # SWAG!
 
         if foundEnemyKing:
             piece.pin(sorted(current_line_of_sight))
 
-    return sorted(result), line_of_sight_to_king
+    return sorted(result), line_of_sight_to_king if line_of_sight_to_king else []
 
 # -----  -----  -----  -----  -----  -----  -----
 
@@ -138,7 +138,7 @@ def diagonals(piece, position: int, board):
         if foundEnemyKing:
             piece.pin(sorted(current_line_of_sight))
 
-    return sorted(result), line_of_sight_to_king
+    return sorted(result), line_of_sight_to_king if line_of_sight_to_king else []
 
 # -----  -----  -----  -----  -----  -----  -----
 
