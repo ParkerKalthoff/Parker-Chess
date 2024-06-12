@@ -39,7 +39,7 @@ class Board:
         self._white_score = 0
         self._black_score = 0
 
-        self.inCheck = False
+        self._inCheck = False
 
         self.PIECE_VALUES = {
             Queen: 9,
@@ -137,7 +137,13 @@ class Board:
 
         if enemy_sight_on_king:  # using to make code more readable, enemy_sight_on_king is either [] or [[1,2,3]] or [[1,2,3], [1,2]]
             print('Check!')
+            print(enemy_sight_on_king)
             self._inCheck = True
+
+
+
+        # Update Legal Moves
+        self.update_legal_moves()
 
         if self._inCheck:  # culls non check preventing moves from other pieces
             if self.is_whites_turn:  # if white is active player
@@ -148,9 +154,6 @@ class Board:
                 for piece in self._black_pieces:
                     if not isinstance(piece, King):
                         piece.movesPreventingCheck(enemy_sight_on_king)
-
-        # Update Legal Moves
-        self.update_legal_moves()
 
         allowed_castles = self.check_if_castling_blocked()
         if not self._inCheck:
@@ -363,6 +366,7 @@ class Board:
                     piece.visionToMoves(self)
                 else:
                     piece.visionToMoves()
+        self.enpassant_square = None
 
     def active_player_legal_moves(self):
         if self.is_whites_turn:

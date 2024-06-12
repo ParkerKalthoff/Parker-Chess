@@ -23,6 +23,10 @@ class Queen(Piece):
 
     #override
     def updateVision(self, board):
-        self._potentialMoves = diagonals(self, self.pos(), board) + straight(self, self.pos(), board)
+        potential_moves_diagonal, kingsight_diagonal = diagonals(self, self.pos(), board)
+        potential_moves_straight, kingsight_straight = straight(self, self.pos(), board)
+        
+        self._potentialMoves = potential_moves_diagonal + potential_moves_straight
+        self.kingsight = kingsight_diagonal if kingsight_diagonal else kingsight_straight if kingsight_straight else None
        
 

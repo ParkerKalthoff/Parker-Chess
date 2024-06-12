@@ -34,17 +34,16 @@ class Piece():
         else:
             self.valid_moves = self._pieceVision
 
-    def movesPreventingCheck(self, check_on_king : list[list[int]]):
-        """ takes 'valid moves' and prunes move that dont stop check, only used when in check """
+    def movesPreventingCheck(self, check_on_king: list[list[int]]):
+        """ Prunes moves that don't stop check, only used when in check
+            Each move in `self.valid_moves` must appear in all sets within `check_on_king` to be considered valid
+        """
         prevents_check_moves = []
+
         for move in self.valid_moves:
-            prevents_check = True
-            for moveset in check_on_king:
-                if move not in moveset:
-                    prevents_check = False
-                    break
-            if prevents_check:
+            if all(move in moveset for moveset in check_on_king):
                 prevents_check_moves.append(move)
+
         self.valid_moves = prevents_check_moves
 
     def getMoves(self):

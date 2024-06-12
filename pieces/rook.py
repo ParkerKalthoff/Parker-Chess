@@ -34,7 +34,7 @@ class Rook(Piece):
 
     #override
     def updateVision(self, board) -> None:
-        self._potentialMoves = straight(self, self.pos(), board)
+        self._potentialMoves, self.kingsight = straight(self, self.pos(), board)
 
 
 

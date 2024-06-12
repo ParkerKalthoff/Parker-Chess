@@ -65,7 +65,8 @@ def pawnTake(piece, position: int, board) -> list[int]:
 
 # -----  -----  -----  -----  -----  -----  -----
 
-def straight(piece, position: int, board) -> list[int]:
+def straight(piece, position: int, board):
+    """Returns the possible straight moves for a rook or queen and line of sight if it directly sees the enemy king."""
     result = []
 
     if not isValidPos(position):
@@ -73,6 +74,7 @@ def straight(piece, position: int, board) -> list[int]:
 
     offsets = [-8, 8, -1, 1]
     friendlyPieces, enemyPieces = getTeams(piece, board)
+    line_of_sight_to_king = None
 
     for offset in offsets:
         current_line_of_sight = []
@@ -88,6 +90,7 @@ def straight(piece, position: int, board) -> list[int]:
                 targetPiece = board.get_square(mySquare)
                 if targetPiece.toChar().upper() == "K" and targetPiece.getColor() != piece.getColor():
                     foundEnemyKing = True
+                    line_of_sight_to_king = current_line_of_sight[:]
                 result.append(mySquare)
                 break
             result.append(mySquare)
@@ -96,22 +99,24 @@ def straight(piece, position: int, board) -> list[int]:
         if foundEnemyKing:
             piece.pin(sorted(current_line_of_sight))
 
-    return sorted(result)
+    return sorted(result), line_of_sight_to_king
 
 # -----  -----  -----  -----  -----  -----  -----
 
-def diagonals(piece, position: int, board) -> list[int]:
-    """ returns the possible diagonal moves for a bishop or queen """
-    result = []
+def diagonals(piece, position: int, board):
+    """Returns the possible diagonal moves for a bishop or queen and line of sight if it directly sees the enemy king."""
     if not isValidPos(position):
         raise IndexError("Invalid position")
 
     offsets = [-9, -7, 7, 9]
     friendlyPieces, enemyPieces = getTeams(piece, board)
+    result = []
+    line_of_sight_to_king = None
 
     for offset in offsets:
-        current_line_of_sight = []  # Track the current pathway
+        current_line_of_sight = []
         foundEnemyKing = False
+
         for i in range(1, 8):
             mySquare = position + i * offset
             if not isValidPos(mySquare):
@@ -121,7 +126,9 @@ def diagonals(piece, position: int, board) -> list[int]:
             if mySquare in enemyPieces:
                 current_line_of_sight.append(mySquare)
                 targetPiece = board.get_square(mySquare)
-                if targetPiece.toChar().upper() != 'K' and targetPiece.getColor() != piece.getColor():
+                if targetPiece.toChar().upper() == 'K' and targetPiece.getColor() != piece.getColor():
+                    line_of_sight_to_king = current_line_of_sight[:]
+                else:
                     foundEnemyKing = True
                 result.append(mySquare)
                 break
@@ -131,8 +138,7 @@ def diagonals(piece, position: int, board) -> list[int]:
         if foundEnemyKing:
             piece.pin(sorted(current_line_of_sight))
 
-    return sorted(result)
-
+    return sorted(result), line_of_sight_to_king
 
 # -----  -----  -----  -----  -----  -----  -----
 
