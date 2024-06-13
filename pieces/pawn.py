@@ -10,22 +10,21 @@ class Pawn(Piece):
         super().__init__(color)
         self.type = "Pawn"
         self.__canEnpassant__ = canEnpassant
+        if color == 'White':
+            self.piece = '♟'
+            self.char = 'P'
+        else:
+            self.piece = '♙'
+            self.char = 'p'
 
     def canEnpassant(self):
         return self.__canEnpassant__
     
     def __str__(self):
-        if self.getColor() == "White": 
-            return '♟' # W
-        else: 
-            return '♙' # B
-    
+        return self.piece
+        
     def toChar(self):
-        if super().getColor() == "White":
-            return 'P'
-        else: 
-         # super().getColor() == "Black":
-            return 'p'
+        return self.char
 
     #override
     def updateVision(self, board):

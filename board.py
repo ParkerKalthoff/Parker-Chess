@@ -123,14 +123,22 @@ class Board:
                 if isinstance(piece, Rook):
                     if piece.pos() == 63:
                         piece.setCastlingCondition(1, self.castling)
-                    if piece.pos() == 56:
+                    elif piece.pos() == 56:
                         piece.setCastlingCondition(2, self.castling)
+                    else:
+                        piece.setCastlingCondition(5, self.castling)
+                if isinstance(piece, King):
+                    piece.setCastlingCondition(self.castling)
             for piece in self._black_pieces:
                 if isinstance(piece, Rook):
                     if piece.pos() == 7:
                         piece.setCastlingCondition(3, self.castling)
-                    if piece.pos() == 0:
+                    elif piece.pos() == 0:
                         piece.setCastlingCondition(4, self.castling)
+                    else:
+                        piece.setCastlingCondition(5, self.castling)
+                if isinstance(piece, King):
+                    piece.setCastlingCondition(self.castling)
 
         # Check for Checks
         enemy_sight_on_king = self.checks_on_active_king()
@@ -182,44 +190,63 @@ class Board:
         # Update Move History
         self.past_positions.append(self.to_FEN())
 
+    def move(self, original_index : str, new_index : str):
+        self._movePiece(original_index, new_index)
+        self.refresh_board()
 
-
-    def movePiece(self, original_index : str, new_index : str) -> None:
+    def _movePiece(self, original_index : str, new_index : str) -> None:
         """ Pass in Starting and ending coords (A1, A2)
         Returns 'Valid' or 'Invalid' and updates board state
         """
+
+        if not self.is_whites_turn:
+            print(1)
+            if isinstance(self.get_square(60), King):
+                print(2)
+                if self.get_square(60).getColor() == 'Black':
+                    print(3)
+                    if new_index in self.get_square(60).getMoves():
+                        print(4)
 
         original_index = self.coordToInt(original_index)
 
         if new_index not in ['O-O-O', 'O-O']: # checks if move is a castle move
             new_index = self.coordToInt(new_index) # converts new_index to a int 0-63
         else: # Castle
-            if not self.is_whites_turn and isinstance(self.get_square(60), King) and self.get_square(60).getColor() == 'Black' and new_index in self.get_square(60).getMoves():
-                    if new_index == 'O-O-O': # ♖___♔___ -> __♔♖____ 
-                        self.get_square(60).disableCastling()
-                        self._board_space[58] = self.get_square(60)
-                        self._board_space[59] = self._board_space[56]
-                        self._board_space[60] = None
-                        self._board_space[56] = None
-                    else: # new_index == 'O-O' ____♔__♖ -> _____♖♔_
-                        self.get_square(60).disableCastling()
-                        self._board_space[62] = self.get_square(60)
-                        self._board_space[61] = self._board_space[63]
-                        self._board_space[60] = None
-                        self._board_space[63] = None
-            elif self.is_whites_turn and isinstance(self.get_square(4), King) and self.get_square(4).getColor() == 'Black' and new_index in self.get_square(4).getMoves():
-                    if new_index == 'O-O': # ♜__♚____ -> _♚♜_____ 
+            if not self.is_whites_turn and isinstance(self.get_square(4), King) and self.get_square(4).getColor() == 'Black' and new_index in self.get_square(4).getMoves():
+                    if new_index == 'O-O-O': # ♜__♚____ -> _♚♜_____ 
                         self.get_square(4).disableCastling()
                         self._board_space[2] = self.get_square(4)
                         self._board_space[3] = self._board_space[0]
                         self._board_space[4] = None
                         self._board_space[0] = None
+                        self.next_turn()
+                        return
                     else: # new_index == 'O-O-O' ___♚___♜ -> ____♜♚__ 
                         self.get_square(4).disableCastling()
                         self._board_space[6] = self.get_square(4)
                         self._board_space[5] = self._board_space[7]
                         self._board_space[4] = None
                         self._board_space[7] = None
+                        self.next_turn()
+                        return
+            elif self.is_whites_turn and isinstance(self.get_square(60), King) and self.get_square(60).getColor() == 'White' and new_index in self.get_square(60).getMoves():
+                if new_index == 'O-O-O': # ♖___♔___ -> __♔♖____ 
+                    self.get_square(60).disableCastling()
+                    self._board_space[58] = self.get_square(60)
+                    self._board_space[59] = self._board_space[56]
+                    self._board_space[60] = None
+                    self._board_space[56] = None
+                    self.next_turn()
+                    return
+                else: # new_index == 'O-O' ____♔__♖ -> _____♖♔_
+                    self.get_square(60).disableCastling()
+                    self._board_space[62] = self.get_square(60)
+                    self._board_space[61] = self._board_space[63]
+                    self._board_space[60] = None
+                    self._board_space[63] = None
+                    self.next_turn()
+                    return
         # Normal Move
 
         if not self.get_square(original_index):
@@ -460,6 +487,10 @@ class Board:
         return f'{board_string} {turn_string} {castling_rights} {enpassant_string} {self.half_move_clock} {self.full_move_number}'
 
     def intToCoord(self, index):
+
+        if index in ['O-O-O', 'O-O']:
+            return index
+
         if not (0 <= index <= 63):
             raise ValueError(f"Index must be in the range 0-63. Index was value : {index}")
         file = chr(ord('a') + (index % 8))
@@ -467,6 +498,10 @@ class Board:
         return file + rank
 
     def coordToInt(self, coord):
+
+        if coord in ['O-O-O', 'O-O']:
+            return coord
+
         if len(coord) != 2 or coord[0] not in 'abcdefgh' or coord[1] not in '12345678':
             raise ValueError("Coordinate must be in the format 'a1' to 'h8'.")
         file = coord[0]

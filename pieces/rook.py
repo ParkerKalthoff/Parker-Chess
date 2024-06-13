@@ -6,7 +6,12 @@ class Rook(Piece):
     def __init__(self, color):
         super().__init__(color)
         self.type = "Rook"
-        self._canCastle = True
+        if color == 'White':
+            self.piece = '♜'
+            self.char = 'R'
+        else:
+            self.piece = '♖'
+            self.char = 'r'
     
     def setCastlingCondition(self, side : int, castling_rights : list[bool] ):
         self._side = side
@@ -18,20 +23,20 @@ class Rook(Piece):
         # 3 : black queens rook
 
     def disableCastling(self):
+
+        if self._side not in [0,1,2,3]:
+            return
+
+        print(self._side)
+
         self._castling_rights[self._side] = False
 
     def __str__(self):
-        if super().getColor() == "White": 
-            return '♜' # W
-        else: 
-            return '♖' # B
+        return self.piece
         
     def toChar(self):
-        if super().getColor() == "White":
-            return 'R'
-        else:
-            return 'r'
-
+        return self.char
+    
     #override
     def updateVision(self, board) -> None:
         self._pieceVision, self.kingsight = straight(self, self.pos(), board)

@@ -8,18 +8,19 @@ class Bishop(Piece):
     def __init__(self, color):
         super().__init__(color)
         self.type = "Bishop"
-    
-    def __str__(self) -> str:
-        if super().getColor() == "White": 
-            return '♝' # W
-        else: 
-            return '♗' # B
 
-    def toChar(self):
-        if super().getColor() == "White":
-            return 'B'
+        if color == 'White':
+            self.piece = '♝'
+            self.char = 'B'
         else:
-            return 'b'
+            self.piece = '♗'
+            self.char = 'b'
+    
+    def __str__(self):
+        return self.piece
+        
+    def toChar(self):
+        return self.char
 
     #override
     def updateVision(self, board) -> None:

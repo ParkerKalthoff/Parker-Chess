@@ -1,23 +1,12 @@
 import boardFactory
 
-#b = boardFactory.board('4k3/pppppppp/8/3B4/8/8/PPPPPPPP/4K3 w - - 0 1')
+b = boardFactory.board('r3k2r/8/3R4/8/8/8/8/4K3 w KQkq - 0 1')
 
-b = boardFactory.defaultBoard()
+#b = boardFactory.defaultBoard()
 
-b.movePiece('d2','d4')
-b.refresh_board()
-
-b.movePiece('d7','d5')
-b.refresh_board()
-
-b.movePiece('e2','e4')
-b.refresh_board()
-
-b.movePiece('e7','e5')
-b.refresh_board()
-
-b.movePiece('f1','b5')
-b.refresh_board()
+b.move('d6', 'f6')
+b.move('e8', 'O-O-O')
+b.move('e1', 'O-O')
 
 
 # 

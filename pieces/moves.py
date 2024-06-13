@@ -81,6 +81,16 @@ def straight(piece, position: int, board):
         foundEnemyKing = False
         for i in range(1, 8):
             mySquare = position + i * offset
+
+            current_row, current_col = divmod(position, 8)
+            target_row, target_col = divmod(mySquare, 8)
+
+            # Check if the move wraps around the board horizontally
+            if offset == -1 and target_col > current_col:  # Moving left
+                break
+            if offset == 1 and target_col < current_col:   # Moving right
+                break
+
             if not isValidPos(mySquare):
                 break
             if mySquare in friendlyPieces:

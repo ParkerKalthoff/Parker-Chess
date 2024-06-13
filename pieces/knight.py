@@ -7,19 +7,19 @@ class Knight(Piece):
     def __init__(self, color):
         super().__init__(color)
         self.type = "Knight"
+        if color == 'White':
+            self.piece = '♞'
+            self.char = 'N'
+        else:
+            self.piece = '♘'
+            self.char = 'n'
 
     
     def __str__(self):
-        if super().getColor() == "White": 
-            return '♞' # W
-        else: 
-            return '♘' # B
-    
+        return self.piece
+        
     def toChar(self):
-        if super().getColor() == "White":
-            return 'N'
-        else:
-            return 'n'
+        return self.char
 
     #override
     def updateVision(self, board):

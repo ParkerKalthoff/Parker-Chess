@@ -12,7 +12,11 @@ def defaultBoard() -> Board:
     return board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 
 def board(fen_string: str) -> Board:
-    """ Takes in a FEN string and returns a board object after validating the FEN string """
+    """ Takes in a FEN string and returns a board object after validating the FEN string 
+        Fen Notation : Board-String, White or Blacks Turn, Castling Rights, Enpassant Square, Half move Counter, Full move clock
+
+        Default Board : rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+    """
     
     validate_fen(fen_string)
 

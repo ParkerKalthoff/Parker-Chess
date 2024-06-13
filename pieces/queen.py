@@ -7,20 +7,20 @@ class Queen(Piece):
     def __init__(self, color):
         super().__init__(color)
         self.type = "Queen"
+        if color == 'White':
+            self.piece = '♛'
+            self.char = 'K'
+        else:
+            self.piece = '♕'
+            self.char = 'k'
 
     
     def __str__(self):
-        if super().getColor() == "White": 
-            return '♛' # W
-        else: 
-            return '♕' # B
-
+        return self.piece
+        
     def toChar(self):
-        if super().getColor() == "White":
-            return 'Q'
-        else:
-            return 'q' 
-
+        return self.char
+    
     #override
     def updateVision(self, board):
         potential_moves_diagonal, kingsight_diagonal = diagonals(self, self.pos(), board)

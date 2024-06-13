@@ -8,12 +8,18 @@ class King(Piece):
     def __init__(self, color):
         super().__init__(color)
         self.type = "King"
+        if color == 'White':
+            self.piece = '♚'
+            self.char = 'K'
+        else:
+            self.piece = '♔'
+            self.char = 'k'
     
     def __str__(self):
-        if super().getColor() == "White": 
-            return '♚' # W
-        else: 
-            return '♔' # B
+        return self.piece
+        
+    def toChar(self):
+        return self.char
         
     def setCastlingCondition(self, castling_rights : list[bool] ):
         self._castling_rights = castling_rights # boards castling rights reference
@@ -26,11 +32,6 @@ class King(Piece):
             self._castling_rights[2] = False
             self._castling_rights[3] = False
 
-    def toChar(self):
-        if super().getColor() == "White":
-            return 'K'
-        else:
-            return 'k'
 
     #override
     def updateVision(self, board):
