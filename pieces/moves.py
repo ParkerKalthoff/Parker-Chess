@@ -68,7 +68,6 @@ def pawnTake(piece, position: int, board) -> list[int]:
 def straight(piece, position: int, board):
     """Returns the possible straight moves for a rook or queen and line of sight if it directly sees the enemy king."""
     result = []
-
     if not isValidPos(position):
         raise IndexError("Invalid position")
 
@@ -82,9 +81,9 @@ def straight(piece, position: int, board):
         for i in range(1, 8):
             mySquare = position + i * offset
 
-            current_row, current_col = divmod(position, 8)
-            target_row, target_col = divmod(mySquare, 8)
-
+            current_col = position % 8
+            target_col = mySquare % 8
+            
             # Check if the move wraps around the board horizontally
             if offset == -1 and target_col > current_col:  # Moving left
                 break
@@ -96,15 +95,17 @@ def straight(piece, position: int, board):
             if mySquare in friendlyPieces:
                 break
             if mySquare in enemyPieces:
-                current_line_of_sight.append(mySquare)
                 targetPiece = board.get_square(mySquare)
-                if targetPiece.toChar().upper() == "K" and targetPiece.getColor() != piece.getColor():#                    __  _   _
-                    foundEnemyKing = True#                                           /\  / / /\  /   / /\        /\  /\   / / / / /_  
-                    line_of_sight_to_king = current_line_of_sight[:] # shallow copy /  \/ / /  \/ __/ /  \      /  \/  \ /_/ /_/ /_
+                current_line_of_sight.append(mySquare)
                 result.append(mySquare)
-                break
-            result.append(mySquare)
-            current_line_of_sight.append(mySquare) # SWAG!
+                if targetPiece.toChar().upper() == "K" and targetPiece.getColor() != piece.getColor():
+                    foundEnemyKing = True
+                    line_of_sight_to_king = current_line_of_sight[:]  # shallow copy
+                else:
+                    break  # Only break if we found an enemy piece that is not the king
+            else:
+                result.append(mySquare)
+                current_line_of_sight.append(mySquare)
 
         if foundEnemyKing:
             piece.pin(sorted(current_line_of_sight))
@@ -131,19 +132,26 @@ def diagonals(piece, position: int, board):
             mySquare = position + i * offset
             if not isValidPos(mySquare):
                 break
+
+            current_row, current_col = divmod(position, 8)
+            target_row, target_col = divmod(mySquare, 8)
+            if abs(target_row - current_row) != abs(target_col - current_col):
+                break
+
             if mySquare in friendlyPieces:
                 break
             if mySquare in enemyPieces:
-                current_line_of_sight.append(mySquare)
                 targetPiece = board.get_square(mySquare)
+                current_line_of_sight.append(mySquare)
+                result.append(mySquare)
                 if targetPiece.toChar().upper() == 'K' and targetPiece.getColor() != piece.getColor():
+                    foundEnemyKing = True
                     line_of_sight_to_king = current_line_of_sight[:]
                 else:
-                    foundEnemyKing = True
+                    break
+            else:
                 result.append(mySquare)
-                break
-            result.append(mySquare)
-            current_line_of_sight.append(mySquare)
+                current_line_of_sight.append(mySquare)
 
         if foundEnemyKing:
             piece.pin(sorted(current_line_of_sight))

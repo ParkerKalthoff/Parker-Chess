@@ -145,7 +145,6 @@ class Board:
 
         if enemy_sight_on_king:  # using to make code more readable, enemy_sight_on_king is either [] or [[1,2,3]] or [[1,2,3], [1,2]]
             print('Check!')
-            print(enemy_sight_on_king)
             self._inCheck = True
 
 
@@ -198,15 +197,6 @@ class Board:
         """ Pass in Starting and ending coords (A1, A2)
         Returns 'Valid' or 'Invalid' and updates board state
         """
-
-        if not self.is_whites_turn:
-            print(1)
-            if isinstance(self.get_square(60), King):
-                print(2)
-                if self.get_square(60).getColor() == 'Black':
-                    print(3)
-                    if new_index in self.get_square(60).getMoves():
-                        print(4)
 
         original_index = self.coordToInt(original_index)
 

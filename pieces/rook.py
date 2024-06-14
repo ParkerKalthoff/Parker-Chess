@@ -27,8 +27,6 @@ class Rook(Piece):
         if self._side not in [0,1,2,3]:
             return
 
-        print(self._side)
-
         self._castling_rights[self._side] = False
 
     def __str__(self):
