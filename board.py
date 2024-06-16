@@ -31,6 +31,9 @@ class Board:
         self.enpassant_square = enpassant_sq
         self.is_whites_turn = is_whites_turn
 
+        self._game_finished = False
+        self._game_winner = None # Stalemate, White, Black
+
         self.past_positions = past_positions if past_positions else [] # game move history
 
         self._white_pieces = []
@@ -50,7 +53,7 @@ class Board:
             King: 999
         }
 
-        self.refresh_board(initialRefresh=True)
+        self._refresh_board(initialRefresh=True)
 
     def print_active_moves(self):
         if self.is_whites_turn:
@@ -83,13 +86,20 @@ class Board:
     def black_score(self) -> int:
         return self._black_score
 
-    def get_score(self) -> int:
+    def _get_score(self) -> int:
+        """ Returns the material difference """
         return self.white_score() - self.black_score()
+    
+    def evaluate(self):
+        """ Returns score, Win condition, or statemate"""
+
+        if self.game_finished:
+            return
     
     def get_turn(self) -> bool:
         return self.is_whites_turn
 
-    def refresh_board(self, initialRefresh=False) -> int:
+    def _refresh_board(self, initialRefresh=False) -> int:
         """ Refreshes internal board values after piece moves 
             >>> InitalRefresh is to not overwrite initial values set by the same, may remove
         """
@@ -180,18 +190,22 @@ class Board:
                             piece.valid_moves.append('O-O-O')
 
         # Check for Checkmates or Stalemates
-            if not self.active_player_legal_moves():
-                if self._inCheck:
-                    print('Checkmate!')
-                else:
-                    print('Stalemate!')
+        if not self.active_player_legal_moves():
+            if self._inCheck:
+                print('Checkmate!')
+                self._game_finished = True
+                self._game_winner = 'White' if self.is_whites_turn else 'Black'
+            else:
+                print('Stalemate!')
+                self._game_finished = True
+                self._game_winner = 'Stalemate'
 
         # Update Move History
         self.past_positions.append(self.to_FEN())
 
     def move(self, original_index : str, new_index : str):
         self._movePiece(original_index, new_index)
-        self.refresh_board()
+        self._refresh_board()
 
     def _movePiece(self, original_index : str, new_index : str) -> None:
         """ Pass in Starting and ending coords (A1, A2)
@@ -240,8 +254,7 @@ class Board:
         # Normal Move
 
         if not self.get_square(original_index):
-            print('Invalid: Empty Square')
-            return 'Invalid'
+            raise ValueError('Invalid: Empty Square')
 
         selected_piece = self.get_square(original_index)
         
@@ -252,8 +265,7 @@ class Board:
         elif selected_piece.getColor() == "Black" and not self.is_whites_turn:
             turn_color = "Black"
         else:
-            print('Invalid: Wrong color piece for the current turn')
-            return 'Invalid'
+            raise ValueError('Invalid: Wrong color piece for the current turn')
 
         if new_index in selected_piece.getMoves():
             print(f'{selected_piece} Moved {original_index} to {new_index}')
@@ -271,8 +283,7 @@ class Board:
             self.next_turn()
             return 'Valid'
         else:
-            print(f'Invalid: Must move a {turn_color} piece')
-            return 'Invalid'
+            raise ValueError(f'Invalid: Must move a {turn_color} piece')
 
             
         
@@ -395,6 +406,7 @@ class Board:
         self.enpassant_square = None
 
     def active_player_legal_moves(self):
+        """ Returns a flat list of legal moves that can be used, mainly for checkmate detection """
         if self.is_whites_turn:
             return self.combine_lists([piece.getMoves() for piece in self._white_pieces])
         else:
@@ -534,7 +546,7 @@ class Board:
             output_str += row_str + "\n"
         if with_chess_coords:
             output_str += "    a   b   c   d   e   f   g   h"
-            output_str += f"\n Score : {self.get_score()}, Active turn : {'w' if self.is_whites_turn else 'b'}, Turn : {self.full_move_number}, ep square"
+            output_str += f"\n Score : {self._get_score()}, Active turn : {'w' if self.is_whites_turn else 'b'}, Turn : {self.full_move_number}, ep square"
         return output_str
 
     def display_board(self) -> str:
