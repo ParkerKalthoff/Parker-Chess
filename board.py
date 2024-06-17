@@ -1,3 +1,4 @@
+from collections import defaultdict
 from pieces.abstractPiece import Piece
 from pieces.queen import Queen
 from pieces.king import King
@@ -33,6 +34,7 @@ class Board:
 
         self._game_finished = False
         self._game_winner = None # Stalemate, White, Black
+        self._past_positions_count = dict() # used for threefold repition check
 
         self.past_positions = past_positions if past_positions else [] # game move history
 
@@ -93,16 +95,51 @@ class Board:
     def evaluate(self):
         """ Returns score, Win condition, or statemate"""
 
-        if self.game_finished:
-            return
+        if self._game_finished:
+            if self._game_winner == 'White':
+                return 1000
+            if self._game_winner == 'Black':
+                return -1000
+            if self._game_winner == 'Stalemate':
+                return 0
+        return self._get_score()
     
-    def get_turn(self) -> bool:
-        return self.is_whites_turn
+    def white_pieces_to_json(self):
+
+        white_pieces = []
+
+        for piece in self._white_pieces:
+            white_pieces.append(
+            {
+                'Piece': piece.toChar(),
+                'Moves': piece.getMoves(),
+                'Position':piece.pos()
+            })
+        return white_pieces
+    
+    def black_pieces_to_json(self):
+
+        black_pieces = []
+
+        for piece in self._black_pieces:
+            black_pieces.append(
+            {
+                'Piece': piece.toChar(),
+                'Moves': piece.getMoves(),
+                'Position':piece.pos()
+            })
+        return black_pieces
+    
+    def get_turn(self) -> str:
+        return "White" if self.is_whites_turn else "Black"
 
     def _refresh_board(self, initialRefresh=False) -> int:
         """ Refreshes internal board values after piece moves 
             >>> InitalRefresh is to not overwrite initial values set by the same, may remove
         """
+
+        if self._game_finished:
+            return
 
         if len(self._board_space) > 64:
             raise BoardSizeError("Board size exceeds 64 squares.")
@@ -356,9 +393,6 @@ class Board:
 
         return enemy_line_of_sight_on_king
 
-    def check_for_no_remaining_moves(self) -> bool:
-        """ Checks if no remaining moves are allowed, in tandem with check_for_checks, this can detect checkmate or stalemate """
-
     def piece_vision(self):
         if self.is_whites_turn:
             for piece in self._black_pieces:
@@ -416,6 +450,10 @@ class Board:
         """ Checks if position has been reached 3 times in a game, resulting in stalemate 
             >>> Returns True for stalemate and False for continued game
         """
+
+        #TODO
+
+
         pass
 
     def check_fifty_move_rule(self) -> bool:
@@ -429,8 +467,6 @@ class Board:
 
     def to_FEN(self) -> str:
         """ Changes board representation to FEN string"""
-
-        # board string
 
         board_string = ''
         rank_board_string = ''
@@ -468,7 +504,6 @@ class Board:
                 else:
                     empty_space_count += 1
 
-    # Ensure empty spaces at the end of the last rank are accounted for
         if empty_space_count:
             rank_board_string += str(empty_space_count)
 
