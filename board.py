@@ -1,4 +1,5 @@
 from collections import defaultdict
+from mimetypes import init
 from pieces.abstractPiece import Piece
 from pieces.queen import Queen
 from pieces.king import King
@@ -34,7 +35,7 @@ class Board:
 
         self._game_finished = False
         self._game_winner = None # Stalemate, White, Black
-        self._past_positions_count = dict() # used for threefold repition check
+        self._past_positions_count = defaultdict(lambda: 0) # used for threefold repition check
 
         self.past_positions = past_positions if past_positions else [] # game move history
 
@@ -111,9 +112,9 @@ class Board:
         for piece in self._white_pieces:
             white_pieces.append(
             {
-                'Piece': piece.toChar(),
-                'Moves': piece.getMoves(),
-                'Position':piece.pos()
+                'Piece': piece.toChar(), # char
+                'Moves': piece.getMoves(), # list[int]
+                'Position':piece.pos() # int
             })
         return white_pieces
     
@@ -124,9 +125,9 @@ class Board:
         for piece in self._black_pieces:
             black_pieces.append(
             {
-                'Piece': piece.toChar(),
-                'Moves': piece.getMoves(),
-                'Position':piece.pos()
+                'Piece': piece.toChar(), # char
+                'Moves': piece.getMoves(), # list[int]
+                'Position':piece.pos() # int
             })
         return black_pieces
     
@@ -199,6 +200,9 @@ class Board:
         # Update Legal Moves
         self.update_legal_moves()
 
+        if not initialRefresh:
+            self.enpassant_square = None
+
         if self._inCheck:  # culls non check preventing moves from other pieces
             if self.is_whites_turn:  # if white is active player
                 for piece in self._white_pieces:
@@ -240,20 +244,22 @@ class Board:
         # Update Move History
         self.past_positions.append(self.to_FEN())
 
-    def move(self, original_index : str, new_index : str):
+    def move(self, original_index : int, new_index : int | str):
+        """using ints"""
         self._movePiece(original_index, new_index)
         self._refresh_board()
 
-    def _movePiece(self, original_index : str, new_index : str) -> None:
-        """ Pass in Starting and ending coords (A1, A2)
+    def move_coord(self, original_index : str, new_index : str):
+        """using strs"""
+        self._movePiece(self.coordToInt(original_index), self.coordToInt(new_index))
+        self._refresh_board()
+
+    def _movePiece(self, original_index : int, new_index : int | str) -> None:
+        """ Pass in Starting and ending coords (5, O-O-O)
         Returns 'Valid' or 'Invalid' and updates board state
         """
 
-        original_index = self.coordToInt(original_index)
-
-        if new_index not in ['O-O-O', 'O-O']: # checks if move is a castle move
-            new_index = self.coordToInt(new_index) # converts new_index to a int 0-63
-        else: # Castle
+        if new_index in ['O-O-O', 'O-O']: # checks if move is a castle move
             if not self.is_whites_turn and isinstance(self.get_square(4), King) and self.get_square(4).getColor() == 'Black' and new_index in self.get_square(4).getMoves():
                     if new_index == 'O-O-O': # ♜__♚____ -> _♚♜_____ 
                         self.get_square(4).disableCastling()
@@ -308,6 +314,10 @@ class Board:
             print(f'{selected_piece} Moved {original_index} to {new_index}')
             moving_piece = self._board_space[original_index] # piece ref, storing in var to poop
             self._board_space[original_index] = None
+
+            if isinstance(self._board_space[new_index], Rook):
+                self._board_space[new_index].disableCastling()
+
             self._board_space[new_index] = moving_piece
             if isinstance(moving_piece, (King, Rook)): # either king or rook disabling castling
                 moving_piece.disableCastling()
@@ -437,7 +447,7 @@ class Board:
                     piece.visionToMoves(self)
                 else:
                     piece.visionToMoves()
-        self.enpassant_square = None
+
 
     def active_player_legal_moves(self):
         """ Returns a flat list of legal moves that can be used, mainly for checkmate detection """
@@ -446,15 +456,34 @@ class Board:
         else:
             return self.combine_lists([piece.getMoves() for piece in self._black_pieces])
 
+    def load_past_positions(self) -> bool:
+        """ loads past positions, doesn't check for stalemate
+        """
+        for fen_string in self.past_positions:
+            position_string = ''
+            for index, part in enumerate(fen_string.split()): # index from 0 to 3
+                if index == 4:
+                    break
+                position_string += part
+            self._past_positions_count[f'{position_string}'] += 1
+
     def check_threefold_repeition(self) -> bool:
         """ Checks if position has been reached 3 times in a game, resulting in stalemate 
             >>> Returns True for stalemate and False for continued game
         """
 
-        #TODO
+        position_string = ''
+        for index, part in enumerate(self.past_positions[-1].split()): # index from 0 to 3
+            if index == 4:
+                break
+            position_string += part
 
 
-        pass
+        self._past_positions_count[f'{position_string}'] += 1
+        if self._past_positions_count[f'{position_string}'] == 3:
+            self._game_finished = True
+            self._game_winner = 'Stalemate'
+
 
     def check_fifty_move_rule(self) -> bool:
         """ Checks if no pawns have moved and no captures in 50 moves """
@@ -527,6 +556,9 @@ class Board:
 
         if index in ['O-O-O', 'O-O']:
             return index
+        
+        if not index:
+            return '-' 
 
         if not (0 <= index <= 63):
             raise ValueError(f"Index must be in the range 0-63. Index was value : {index}")
@@ -581,7 +613,7 @@ class Board:
             output_str += row_str + "\n"
         if with_chess_coords:
             output_str += "    a   b   c   d   e   f   g   h"
-            output_str += f"\n Score : {self._get_score()}, Active turn : {'w' if self.is_whites_turn else 'b'}, Turn : {self.full_move_number}, ep square"
+            output_str += f"\n Score : {self._get_score()}, Active turn : {'w' if self.is_whites_turn else 'b'}, Turn : {self.full_move_number}, ep square {self.intToCoord(self.enpassant_square)}"
         return output_str
 
     def display_board(self) -> str:

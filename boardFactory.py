@@ -30,7 +30,7 @@ def board(fen_string: str) -> Board:
 
     is_whites_turn = parts[1] == 'w'
     castling_rights = parse_castling_rights(parts[2])
-    en_passant_square = coordinateToIndex(parts[3]) if parts[3] != '-' else -1
+    en_passant_square = coordinateToIndex(parts[3]) if parts[3] != '-' else None
     half_move_clock = int(parts[4])
     full_move_number = int(parts[5])
 
@@ -68,8 +68,8 @@ def validate_fen(fen: str):
     if not all(c in 'KQkq-' for c in parts[2]):
         raise ValueError(f"FEN string has invalid castling availability: {parts[2]}")
 
-    if parts[3] != '-' and not (len(parts[3]) == 2 and parts[3][0] in 'abcdefgh' and parts[3][1] in '36'):
-        raise ValueError(f"FEN string has invalid en passant target square: {parts[3]}")
+    if parts[3] != '-' and not (len(parts[3]) == 2 and parts[3][0] in 'abcdefgh' and parts[3][1] in '12345678'):
+        raise ValueError(f"FEN string has invalid en passant target square: {parts[3]}, {len(parts[3]) == 2}, {parts[3][0] in 'abcdefgh'}, {parts[3][1] in '36'} ")
 
     if not parts[4].isdigit():
         raise ValueError(f"FEN string has invalid half move clock value: {parts[4]}")
@@ -78,15 +78,14 @@ def validate_fen(fen: str):
         raise ValueError(f"FEN string has invalid full move counter value: {parts[5]}")
 
 
-def coordinateToIndex(coord: str) -> int:
-    """Converts board coordinates (e.g., 'e4') to a board index (0-63)."""
-    if coord == '-':
-        return -1
-
-    file_to_index = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
-    file, rank = coord[0], coord[1]
-    
-    index = file_to_index[file] + (8 * (int(rank) - 1))
+def coordinateToIndex(coord):
+    if coord in ['O-O-O', 'O-O']:
+        return coord
+    if len(coord) != 2 or coord[0] not in 'abcdefgh' or coord[1] not in '12345678':
+        raise ValueError("Coordinate must be in the format 'a1' to 'h8'.")
+    file = coord[0]
+    rank = coord[1]
+    index = (ord(file) - ord('a')) + (8 - int(rank)) * 8
     return index
 
 def parse_castling_rights(castling_string: str) -> list[bool]:
