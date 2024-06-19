@@ -38,30 +38,33 @@ def pawnForward(piece, position: int, board) -> list[int]:
     return [firstSquare]
 
 def pawnTake(piece, position: int, board) -> list[int]:
-    """Returns the capturing moves for a pawn."""
+    """Returns the capturing moves for a pawn """
     direction = -1 if piece.getColor() == "White" else 1
-    rightSquare = position + (7 * direction)
-    leftSquare = position + (9 * direction)
-
     moveset = []
+
+    rightOffset = 7 if piece.getColor() == "White" else 9
+    leftOffset = 9 if piece.getColor() == "White" else 7
+
+    rightSquare = position + (rightOffset * direction)
+    leftSquare = position + (leftOffset * direction)
 
     if isValidPos(rightSquare):
         targetPiece = board.get_square(rightSquare)
-        if targetPiece and x_Pos(rightSquare) == x_Pos(position) + 1 and piece.getColor() != targetPiece.getColor():
+        if targetPiece and piece.getColor() != targetPiece.getColor() and x_Pos(rightSquare) == x_Pos(position) + 1:
             moveset.append(rightSquare)
-
         if board.enpassant_square == rightSquare:
-                    moveset.append(rightSquare)
+            moveset.append(rightSquare)
 
     if isValidPos(leftSquare):
         targetPiece = board.get_square(leftSquare)
-        if targetPiece and x_Pos(leftSquare) == x_Pos(position) - 1 and piece.getColor() != targetPiece.getColor():
+        if targetPiece and piece.getColor() != targetPiece.getColor() and x_Pos(leftSquare) == x_Pos(position) - 1:
             moveset.append(leftSquare)
-
         if board.enpassant_square == leftSquare:
             moveset.append(leftSquare)
 
     return moveset
+
+
 
 # -----  -----  -----  -----  -----  -----  -----
 

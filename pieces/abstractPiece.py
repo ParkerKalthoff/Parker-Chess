@@ -38,9 +38,11 @@ class Piece():
         """ Prunes moves that don't stop check, only used when in check
             Each move in `self.valid_moves` must appear in all sets within `check_on_king` to be considered valid
         """
+
         prevents_check_moves = []
 
         for move in self.valid_moves:
+            print(all(move in moveset for moveset in check_on_king), move, self.valid_moves, self, self.pos())
             if all(move in moveset for moveset in check_on_king):
                 prevents_check_moves.append(move)
 

@@ -392,11 +392,11 @@ class Board:
         
         enemy_line_of_sight_on_king = []
         for piece in enemies_attacking_king:
-            if isinstance(piece, (Knight, Pawn)):
-                print([activePlayersKing.pos(), piece.pos()])
+            if isinstance(piece, Pawn):
                 enemy_line_of_sight_on_king.append([activePlayersKing.pos(), piece.pos()])
+            elif isinstance(piece, Knight):
+                enemy_line_of_sight_on_king.append([piece.pos()])
             else:
-                print(piece.kingsight + [piece.pos()])
                 enemy_line_of_sight_on_king.append(piece.kingsight + [piece.pos()])
 
         # this is the vision lines of the enemy on active players king, this will be used to detect double checks
@@ -557,7 +557,7 @@ class Board:
         if index in ['O-O-O', 'O-O']:
             return index
         
-        if not index:
+        if not index and not index == 0:
             return '-' 
 
         if not (0 <= index <= 63):
