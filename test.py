@@ -11,4 +11,11 @@ print(b.to_FEN())
 
 
 # TODO 50 move 
+#   - Counter and set certain moves to reset this
 # TODO Stalemate by material
+#   - Check chess.com for how to do
+# TODO pawn promote:
+#   - Check if pawn move is on 1st or 8th rank and then produce 4 variations of that move (check captures for it too)
+#   - Will have to impliment safety features for this move in move
+
+# TODO Basic testing
