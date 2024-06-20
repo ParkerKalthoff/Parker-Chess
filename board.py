@@ -139,6 +139,10 @@ class Board:
             >>> InitalRefresh is to not overwrite initial values set by the same, may remove
         """
 
+        if self.half_move_clock >= 100:
+            self._game_finished = True
+            self._game_winner = 'Stalemate'
+
         if self._game_finished:
             return
 
@@ -267,6 +271,7 @@ class Board:
                         self._board_space[3] = self._board_space[0]
                         self._board_space[4] = None
                         self._board_space[0] = None
+                        self.half_move_clock += 1
                         self.next_turn()
                         return
                     else: # new_index == 'O-O-O' ___♚___♜ -> ____♜♚__ 
@@ -275,6 +280,7 @@ class Board:
                         self._board_space[5] = self._board_space[7]
                         self._board_space[4] = None
                         self._board_space[7] = None
+                        self.half_move_clock += 1
                         self.next_turn()
                         return
             elif self.is_whites_turn and isinstance(self.get_square(60), King) and self.get_square(60).getColor() == 'White' and new_index in self.get_square(60).getMoves():
@@ -284,6 +290,7 @@ class Board:
                     self._board_space[59] = self._board_space[56]
                     self._board_space[60] = None
                     self._board_space[56] = None
+                    self.half_move_clock += 1
                     self.next_turn()
                     return
                 else: # new_index == 'O-O' ____♔__♖ -> _____♖♔_
@@ -292,6 +299,7 @@ class Board:
                     self._board_space[61] = self._board_space[63]
                     self._board_space[60] = None
                     self._board_space[63] = None
+                    self.half_move_clock += 1
                     self.next_turn()
                     return
         # Normal Move
@@ -315,6 +323,9 @@ class Board:
             moving_piece = self._board_space[original_index] # piece ref, storing in var to poop
             self._board_space[original_index] = None
 
+            if self._board_space[new_index]:
+                self.half_move_clock = 0 # capture
+
             if isinstance(self._board_space[new_index], Rook):
                 self._board_space[new_index].disableCastling()
 
@@ -322,11 +333,13 @@ class Board:
             if isinstance(moving_piece, (King, Rook)): # either king or rook disabling castling
                 moving_piece.disableCastling()
             if isinstance(moving_piece, Pawn): # special rules pawns
+                self.half_move_clock = 0 # pawn move
                 if moving_piece.__canEnpassant__: # If pawn can enpassant
                     if abs(original_index - new_index) == 16: # if pawn enpassants
                         self.enpassant_square = new_index - (-8 if moving_piece.getColor() == 'White' else 8)
                     moving_piece.__canEnpassant__ = False # otherwise disable enpassant
                 self._board_space[new_index + (8 if moving_piece.getColor() == 'White' else -8)] = None # otherwise checking if pawn takes piece by enpassant, having to remove a pawn thats a rank higher
+            self.half_move_clock += 1
             self.next_turn()
             return 'Valid'
         else:
