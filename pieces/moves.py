@@ -13,6 +13,7 @@ def pawnMove(piece, position: int, board) -> list[int]:
     moveset = (pawnForward(piece, position, board) +
                enpassant(piece, position, board) +
                pawnTake(piece, position, board))
+    
     return sorted(moveset)
 
 def enpassant(piece, position: int, board) -> list[int]:

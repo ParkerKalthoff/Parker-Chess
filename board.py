@@ -591,11 +591,6 @@ class Board:
         index = (ord(file) - ord('a')) + (8 - int(rank)) * 8
         return index
 
-
-    def piece_moves(self, position: int) -> list[int]:
-        piece = self._board_space[position]
-        return piece.getMoves(position, self) if piece else []
-
     def get_square(self, position: int) -> Piece | None:
         return self._board_space[position]
 
