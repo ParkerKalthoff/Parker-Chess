@@ -61,10 +61,27 @@ class Board:
     def print_active_moves(self):
         if self.is_whites_turn:
             for piece in self._white_pieces:
-                print(self.intToCoord(piece.pos()), piece, [self.intToCoord(move) for move in piece.getMoves()])
+                if isinstance(piece, Pawn) and 8 <= piece.pos() <= 15:
+                    promote_moves = []
+                    for move in piece.getMoves():
+                        promote_moves += [f'{move}=B', f'{move}=N', f'{move}=R', f'{move}=Q']
+                    print(
+                    self.intToCoord(piece.pos()),
+                    piece,
+                    [f'{self.intToCoord(int(move.split("=")[0]))}={move.split("=")[1]}' for move in promote_moves])
+                else:
+                    print(self.intToCoord(piece.pos()), piece, [self.intToCoord(move) for move in piece.getMoves()])
         else:
             for piece in self._black_pieces:
-                print(self.intToCoord(piece.pos()), piece, [self.intToCoord(move) for move in piece.getMoves()])
+                if isinstance(piece, Pawn) and 48 <= piece.pos() <= 55:
+                    promote_moves = []
+                    for move in piece.getMoves():
+                        promote_moves += [f'{move}=B', f'{move}=N', f'{move}=R', f'{move}=Q']
+                    print(self.intToCoord(piece.pos()), piece, [f'{self.intToCoord(int(move.split("=")[0]))}={move.split("=")[1]}' for move in promote_moves])
+                else:
+                    print(self.intToCoord(piece.pos()), piece, [self.intToCoord(move) for move in piece.getMoves()])
+
+
 
     def combine_lists(self, input_list : list[list[int]]) -> list[int]:
         """ Returns a flat representation of a 2d array """
