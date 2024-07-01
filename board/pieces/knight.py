@@ -1,5 +1,7 @@
 from moves import knightMoves
-from pieces.abstractPiece import Piece
+from board.pieces.abstractPiece import Piece
+
+
 
 class Knight(Piece):
 

@@ -1,0 +1,5 @@
+setup.py
+parker_chess.egg-info/PKG-INFO
+parker_chess.egg-info/SOURCES.txt
+parker_chess.egg-info/dependency_links.txt
+parker_chess.egg-info/top_level.txt

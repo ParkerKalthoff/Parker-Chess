@@ -16,3 +16,5 @@ pieces/__pycache__/bishop.cpython-311.pyc
 __pycache__/board.cpython-311.pyc
 pieces/__pycache__/moves.cpython-311.pyc
 __pycache__
+ignore.py
+test.py

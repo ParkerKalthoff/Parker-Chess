@@ -1,12 +1,11 @@
 from collections import defaultdict
-from mimetypes import init
-from pieces.abstractPiece import Piece
-from pieces.queen import Queen
-from pieces.king import King
-from pieces.bishop import Bishop
-from pieces.knight import Knight
-from pieces.rook import Rook
-from pieces.pawn import Pawn
+from board.pieces.abstractPiece import Piece
+from board.pieces.queen import Queen
+from board.pieces.king import King
+from board.pieces.bishop import Bishop
+from board.pieces.knight import Knight
+from board.pieces.rook import Rook
+from board.pieces.pawn import Pawn
 
 class BoardSizeError(Exception):
     """Custom exception for board size errors."""
@@ -42,8 +41,11 @@ class Board:
         self._white_pieces = []
         self._black_pieces = []
 
-        self._white_score = 0
-        self._black_score = 0
+        self._white_piece_counts = [0,0,0,0,0] # an array with a count of the pieces for stalemate determination
+        self._black_piece_counts = [0,0,0,0,0] # [P, B, N, R, Q] expl : [8, 2, 2, 2, 1]
+
+        self.white_score = 0
+        self.black_score = 0
 
         self._inCheck = False
 
@@ -87,7 +89,7 @@ class Board:
         """ Returns a flat representation of a 2d array """
         return [item for list in input_list for item in list]
 
-    def next_turn(self) -> None:
+    def _next_turn(self) -> None:
         self.is_whites_turn = not self.is_whites_turn
         self.past_positions.append(self.to_FEN())
 
@@ -100,15 +102,15 @@ class Board:
     def black_piece_indices(self) -> list[int]:
         return [piece.pos() for piece in self._black_pieces]
 
-    def white_score(self) -> int:
-        return self._white_score
+    def _white_score(self) -> int:
+        return self.white_score
 
-    def black_score(self) -> int:
-        return self._black_score
+    def _black_score(self) -> int:
+        return self.black_score
 
     def _get_score(self) -> int:
         """ Returns the material difference """
-        return self.white_score() - self.black_score()
+        return self._white_score() - self._black_score()
     
     def evaluate(self):
         """ Returns score, Win condition, or statemate"""
@@ -127,12 +129,28 @@ class Board:
         white_pieces = []
 
         for piece in self._white_pieces:
-            white_pieces.append(
-            {
-                'Piece': piece.toChar(), # char
-                'Moves': piece.getMoves(), # list[int]
-                'Position':piece.pos() # int
-            })
+            if isinstance(piece, Pawn) and 8 <= piece.pos() <= 15:
+
+                temp = []
+
+                for move in piece.getMoves():
+                    move = self.intToCoord(move)
+                    temp += [f'{move}=B', f'{move}=N', f'{move}=R', f'{move}=Q']
+
+                white_pieces.append(
+                {
+                    'Piece': piece.toChar(), # char
+                    'Moves': temp, # list[str]
+                    'Position':self.intToCoord(piece.pos()) # int
+                })
+            else:
+                white_pieces.append(
+                {
+                    'Piece': piece.toChar(), # char
+                    'Moves': self.intToCoord(piece.getMoves()), # list[int]
+                    'Position':self.intToCoord(piece.pos()) # int
+                })
+
         return white_pieces
     
     def black_pieces_to_json(self):
@@ -140,12 +158,25 @@ class Board:
         black_pieces = []
 
         for piece in self._black_pieces:
-            black_pieces.append(
-            {
-                'Piece': piece.toChar(), # char
-                'Moves': piece.getMoves(), # list[int]
-                'Position':piece.pos() # int
-            })
+            if isinstance(piece, Pawn) and 48 <= piece.pos() <= 55:
+                temp = []
+                for move in piece.getMoves():
+                    move = self.intToCoord(move)
+                    temp += [f'{move}=B', f'{move}=N', f'{move}=R', f'{move}=Q']
+                black_pieces.append(
+                {
+                    'Piece': piece.toChar(), # char
+                    'Moves': temp, # list[str]
+                    'Position': self.intToCoord(piece.pos()) # str
+                })
+            else:
+                black_pieces.append(
+                {
+                    'Piece': piece.toChar(), # char
+                    'Moves': self.intToCoord(piece.getMoves()), # list[str]
+                    'Position': self.intToCoord(piece.pos()) # str
+                })
+
         return black_pieces
     
     def get_turn(self) -> str:
@@ -156,13 +187,6 @@ class Board:
             >>> InitalRefresh is to not overwrite initial values set by the same, may remove
         """
 
-        if self.half_move_clock >= 100:
-            self._game_finished = True
-            self._game_winner = 'Stalemate'
-
-        if self._game_finished:
-            return
-
         if len(self._board_space) > 64:
             raise BoardSizeError("Board size exceeds 64 squares.")
 
@@ -171,19 +195,19 @@ class Board:
 
         self._inCheck = False
 
-        self._white_score = 0
-        self._black_score = 0
+        self.white_score = 0
+        self.black_score = 0
 
         for index, piece in enumerate(self._board_space):
             if piece:
                 if piece.getColor() == 'White':
                     piece.setPos(index)
                     self._white_pieces.append(piece)
-                    self._white_score += self.PIECE_VALUES[type(piece)]
+                    self.white_score += self.PIECE_VALUES[type(piece)]
                 else:  # piece.getColor() == 'Black'
                     piece.setPos(index)
                     self._black_pieces.append(piece)
-                    self._black_score += self.PIECE_VALUES[type(piece)]
+                    self.black_score += self.PIECE_VALUES[type(piece)]
 
         self.piece_vision()
 
@@ -210,16 +234,15 @@ class Board:
                     piece.setCastlingCondition(self.castling)
 
         # Check for Checks
-        enemy_sight_on_king = self.checks_on_active_king()
+        enemy_sight_on_king = self._checks_on_active_king()
 
         if enemy_sight_on_king:  # using to make code more readable, enemy_sight_on_king is either [] or [[1,2,3]] or [[1,2,3], [1,2]]
-            print('Check!')
             self._inCheck = True
 
 
 
         # Update Legal Moves
-        self.update_legal_moves()
+        self._update_legal_moves()
 
         if not initialRefresh:
             self.enpassant_square = None
@@ -252,32 +275,112 @@ class Board:
                             piece.valid_moves.append('O-O-O')
 
         # Check for Checkmates or Stalemates
-        if not self.active_player_legal_moves():
+        if not self._active_player_legal_moves():
             if self._inCheck:
-                print('Checkmate!')
                 self._game_finished = True
                 self._game_winner = 'White' if self.is_whites_turn else 'Black'
             else:
-                print('Stalemate!')
                 self._game_finished = True
                 self._game_winner = 'Stalemate'
 
         # Update Move History
         self.past_positions.append(self.to_FEN())
 
-    def move(self, original_index : int, new_index : int | str):
-        """using ints"""
-        self._movePiece(original_index, new_index)
-        self._refresh_board()
+        # self.check_fifty_move_rule
+
+        if self.half_move_clock >= 100:
+            self._game_finished = True
+            self._game_winner = 'Stalemate'
+
+        if self._game_finished:
+            return
+
+        self.check_threefold_repeition()
+        self.stalemateByMaterial()
+
+
+    def move(self, piece_move : str):
+        """ Moving piece, 
+            A1 to A2 : 'A1A2'
+            D1 to O-O-O : 'D1O-O-O'
+            D7 to D8 Queen : 'D7D8=Q'
+            """
+        
+        if len(piece_move) < 4:
+            ValueError(f'Move Sent is {piece_move}, invalid bro')
+
+        self.move_coord(piece_move[:2], piece_move[2:])
 
     def move_coord(self, original_index : str, new_index : str):
         """using strs"""
-        self._movePiece(self.coordToInt(original_index), self.coordToInt(new_index))
+
+        active_piece = self.get_square(self.coordToInt(original_index))
+
+        if isinstance(active_piece, Pawn): # checking if player is trying to move pawn to promotion
+            if active_piece.getColor() == 'White' and 8 <= active_piece.pos() <= 15: # ready for promotion
+
+                move = new_index.split('=')
+
+                if len(move) != 2:
+                    raise ValueError(f'Move should include promotion ("A1=Q"), actual move {move} ')
+                
+                if move[1] not in ['B', 'N', 'R', 'Q']:
+                    raise ValueError(f'The promotion indicated is invalid {move[1]}')
+
+                self._movePiece(self.coordToInt(original_index), self.coordToInt(move[0]))
+
+                promoted_piece = None
+
+                if move[1] == 'B':
+                    promoted_piece = Bishop('White')
+                elif move[1] == 'N':
+                    promoted_piece = Knight('White')
+                elif move[1] == 'R':
+                    promoted_piece = Rook('White')
+                elif move[1] == 'Q':
+                    promoted_piece = Queen('White')
+                else:
+                    raise ValueError(f'The promotion indicated is invalid {move[1]}')
+
+                self._board_space[self.coordToInt(move[0])] = promoted_piece
+
+            elif active_piece.getColor() == 'Black' and 48 <= active_piece.pos() <= 55: # ready for promotion
+
+                move = new_index.split('=')
+
+                if len(move) != 2:
+                    raise ValueError(f'Move should include promotion ("A1=Q"), actual move {move} ')
+                
+                if move[1] not in ['B', 'N', 'R', 'Q']:
+                    raise ValueError(f'The promotion indicated is invalid {move[1]}')
+
+
+                self._movePiece(self.coordToInt(original_index), self.coordToInt(move[0]))
+
+                promoted_piece = None
+
+                if move[1] == 'B':
+                    promoted_piece = Bishop('Black')
+                elif move[1] == 'N':
+                    promoted_piece = Knight('Black')
+                elif move[1] == 'R':
+                    promoted_piece = Rook('Black')
+                elif move[1] == 'Q':
+                    promoted_piece = Queen('Black')
+                else:
+                    raise ValueError(f'The promotion indicated is invalid {move[1]}')
+
+                self._board_space[self.coordToInt(move[0])] = promoted_piece
+
+            else: # pawn not promoting
+                self._movePiece(self.coordToInt(original_index), self.coordToInt(new_index))
+        else: # normal piece
+            self._movePiece(self.coordToInt(original_index), self.coordToInt(new_index))
+
         self._refresh_board()
 
     def _movePiece(self, original_index : int, new_index : int | str) -> None:
-        """ Pass in Starting and ending coords (5, O-O-O)
-        Returns 'Valid' or 'Invalid' and updates board state
+        """ Pass in Starting and ending coords (5, O-O-O), doesn't support direct promotion use other method !!
         """
 
         if new_index in ['O-O-O', 'O-O']: # checks if move is a castle move
@@ -289,7 +392,7 @@ class Board:
                         self._board_space[4] = None
                         self._board_space[0] = None
                         self.half_move_clock += 1
-                        self.next_turn()
+                        self._next_turn()
                         return
                     else: # new_index == 'O-O-O' ___♚___♜ -> ____♜♚__ 
                         self.get_square(4).disableCastling()
@@ -298,7 +401,7 @@ class Board:
                         self._board_space[4] = None
                         self._board_space[7] = None
                         self.half_move_clock += 1
-                        self.next_turn()
+                        self._next_turn()
                         return
             elif self.is_whites_turn and isinstance(self.get_square(60), King) and self.get_square(60).getColor() == 'White' and new_index in self.get_square(60).getMoves():
                 if new_index == 'O-O-O': # ♖___♔___ -> __♔♖____ 
@@ -308,7 +411,7 @@ class Board:
                     self._board_space[60] = None
                     self._board_space[56] = None
                     self.half_move_clock += 1
-                    self.next_turn()
+                    self._next_turn()
                     return
                 else: # new_index == 'O-O' ____♔__♖ -> _____♖♔_
                     self.get_square(60).disableCastling()
@@ -317,7 +420,7 @@ class Board:
                     self._board_space[60] = None
                     self._board_space[63] = None
                     self.half_move_clock += 1
-                    self.next_turn()
+                    self._next_turn()
                     return
         # Normal Move
 
@@ -336,7 +439,6 @@ class Board:
             raise ValueError('Invalid: Wrong color piece for the current turn')
 
         if new_index in selected_piece.getMoves():
-            print(f'{selected_piece} Moved {original_index} to {new_index}')
             moving_piece = self._board_space[original_index] # piece ref, storing in var to poop
             self._board_space[original_index] = None
 
@@ -357,7 +459,7 @@ class Board:
                     moving_piece.__canEnpassant__ = False # otherwise disable enpassant
                 self._board_space[new_index + (8 if moving_piece.getColor() == 'White' else -8)] = None # otherwise checking if pawn takes piece by enpassant, having to remove a pawn thats a rank higher
             self.half_move_clock += 1
-            self.next_turn()
+            self._next_turn()
             return 'Valid'
         else:
             raise ValueError(f'Invalid: Must move a {turn_color} piece')
@@ -378,8 +480,8 @@ class Board:
 
         castling_squares_list = [white_kingside, white_queenside, black_kingside, black_queenside]
 
-        white_vision = self.combine_lists(self.white_piece_vision())
-        black_vision = self.combine_lists(self.black_piece_vision())
+        white_vision = self.combine_lists(self._white_piece_vision())
+        black_vision = self.combine_lists(self._black_piece_vision())
 
         permitted_castling = []
 
@@ -406,7 +508,7 @@ class Board:
 
         return legal_castling
 
-    def checks_on_active_king(self) -> list[list[int]] | None:
+    def _checks_on_active_king(self) -> list[list[int]] | None:
         """ Checks for checks on board, based on current board state and Active Player in position"""
 
         if self.is_whites_turn:
@@ -462,7 +564,7 @@ class Board:
             [piece for piece in self._white_pieces if isinstance(piece, King)][0].updateVision(self)
 
 
-    def update_legal_moves(self):
+    def _update_legal_moves(self):
         """ loops over pieces to update internal legal moves """
 
         if self.is_whites_turn:
@@ -479,7 +581,7 @@ class Board:
                     piece.visionToMoves()
 
 
-    def active_player_legal_moves(self):
+    def _active_player_legal_moves(self):
         """ Returns a flat list of legal moves that can be used, mainly for checkmate detection """
         if self.is_whites_turn:
             return self.combine_lists([piece.getMoves() for piece in self._white_pieces])
@@ -515,14 +617,54 @@ class Board:
             self._game_winner = 'Stalemate'
 
 
-    def check_fifty_move_rule(self) -> bool:
-        """ Checks if no pawns have moved and no captures in 50 moves """
-        pass
-
-    def stalemateByMaterial(self) -> bool:
+    def stalemateByMaterial(self) -> None:
         """ Checks for stalemate by lack of material
+            based on : https://support.chess.com/en/articles/8705277-what-does-insufficient-mating-material-mean
             >>> Cases 
+
         """
+
+        self._white_piece_counts = [0,0,0,0,0]
+        self._black_piece_counts = [0,0,0,0,0]
+
+        piece_index = {
+            'p' : 0, 'P' : 0,
+            'b' : 1, 'B' : 1,
+            'n' : 2, 'N' : 2,
+            'r' : 3, 'R' : 3,
+            'q' : 4, 'Q' : 4,
+        }
+
+        for piece in self._white_pieces:
+            if piece.toChar() == 'K':
+                continue
+            self._white_piece_counts[piece_index[piece.toChar()]] += 1
+
+        for piece in self._black_pieces:
+            if piece.toChar() == 'k':
+                continue
+            self._black_piece_counts[piece_index[piece.toChar()]] += 1
+
+        if self._black_piece_counts[0] or self._white_piece_counts[0]: # has pawn
+            return
+        
+        if self._black_piece_counts[3] or self._white_piece_counts[3] or self._black_piece_counts[4] or self._white_piece_counts[4]:
+            # has rook or queen
+            return
+
+        for piece_counts in [[self._white_piece_counts, self._black_piece_counts],[self._black_piece_counts, self._white_piece_counts]]:
+            if piece_counts[0] in [[0,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0]] and piece_counts[1] in [[0,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0]]:
+                self._game_winner = 'Stalemate'
+                self._game_finished = True
+                return
+            
+            if piece_counts[0] == [0,0,2,0,0] and piece_counts[1] == [0,1,0,0,0]:
+                return
+            
+            if piece_counts[0] == [0,0,2,0,0] and piece_counts[1] == [0,0,0,0,0]:
+                self._game_winner = 'Stalemate'
+                self._game_finished = True
+                return
 
     def to_FEN(self) -> str:
         """ Changes board representation to FEN string"""
@@ -615,33 +757,31 @@ class Board:
         """ Unused, leaving for now"""
         return self._white_pieces + self._black_pieces
 
-    def white_piece_vision(self) -> list[list[int]]:
+    def _white_piece_vision(self) -> list[list[int]]:
         """ returns 2d array of white pieces vision """
         return [piece.getVision() for piece in self._white_pieces]
 
-    def black_piece_vision(self) -> list[list[int]]:
+    def _black_piece_vision(self) -> list[list[int]]:
         """ returns 2d array of black pieces vision """
         return [piece.getVision() for piece in self._black_pieces]
 
-    def __str__(self, with_chess_coords: bool = False) -> str:
-        column_num = ['8', '7', '6', '5', '4', '3', '2', '1']
-        output_str = " _______________________________\n"
-        if with_chess_coords:
-            output_str = "  " + output_str
-        for row in range(8):
-            row_str = "|"
-            if with_chess_coords:
-                row_str = column_num[row] + "-" + row_str
-            for col in range(8):
-                piece = self._board_space[row * 8 + col]
-                row_str += f"{'_' + piece.__str__() +'_' if piece else '___'}|"
-            output_str += row_str + "\n"
-        if with_chess_coords:
-            output_str += "    a   b   c   d   e   f   g   h"
-            output_str += f"\n Score : {self._get_score()}, Active turn : {'w' if self.is_whites_turn else 'b'}, Turn : {self.full_move_number}, ep square {self.intToCoord(self.enpassant_square)}"
+    def __str__(self) -> str:
+        board = self.to_FEN().split()[0]
+
+        output_str = ''
+
+        for char in board:
+            if char == '/':
+                output_str += '\n'
+                continue
+            
+            if char in 'pbnrqkPBNRQK':
+                output_str += f'{char} '
+            else:
+                output_str += '. ' * int(char)
+
         return output_str
 
-    def display_board(self) -> str:
-        print(self.__str__(with_chess_coords=True))
+
 
 
