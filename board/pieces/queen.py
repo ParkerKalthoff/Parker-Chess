@@ -1,5 +1,5 @@
-from moves import diagonals, straight
-from board.pieces.abstractPiece import Piece
+from .moves import diagonals, straight
+from ...board.pieces.abstractPiece import Piece
 
 class Queen(Piece):
 

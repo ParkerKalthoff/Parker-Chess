@@ -1,5 +1,5 @@
-from moves import straight
-from board.pieces.abstractPiece import Piece
+from .moves import straight
+from ...board.pieces.abstractPiece import Piece
 
 class Rook(Piece):
 

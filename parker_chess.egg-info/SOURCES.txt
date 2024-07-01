@@ -1,3 +1,4 @@
+README.md
 setup.py
 parker_chess.egg-info/PKG-INFO
 parker_chess.egg-info/SOURCES.txt

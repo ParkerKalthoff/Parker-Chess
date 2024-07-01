@@ -1,11 +1,11 @@
-from board.pieces.queen import Queen
-from board.pieces.king import King
-from board.pieces.rook import Rook
-from board.pieces.bishop import Bishop
-from board.pieces.knight import Knight
-from board.pieces.pawn import Pawn
-from board.pieces.abstractPiece import Piece
-from board.board import Board
+from ..board.pieces.queen import Queen
+from ..board.pieces.king import King
+from ..board.pieces.rook import Rook
+from ..board.pieces.bishop import Bishop
+from ..board.pieces.knight import Knight
+from ..board.pieces.pawn import Pawn
+from ..board.pieces.abstractPiece import Piece
+from ..board.board import Board
 
 def defaultBoard() -> Board:
     """Creates a default board with the standard starting position."""

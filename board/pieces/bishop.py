@@ -1,5 +1,5 @@
-from moves import diagonals
-from board.pieces.abstractPiece import Piece
+from .moves import diagonals
+from ...board.pieces.abstractPiece import Piece
 
 
 

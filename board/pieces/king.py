@@ -1,5 +1,5 @@
-from moves import squareMoves
-from board.pieces.abstractPiece import Piece
+from .moves import squareMoves
+from ...board.pieces.abstractPiece import Piece
 
 
 

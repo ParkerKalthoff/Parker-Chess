@@ -1,11 +1,11 @@
 from collections import defaultdict
-from board.pieces.abstractPiece import Piece
-from board.pieces.queen import Queen
-from board.pieces.king import King
-from board.pieces.bishop import Bishop
-from board.pieces.knight import Knight
-from board.pieces.rook import Rook
-from board.pieces.pawn import Pawn
+from ..board.pieces.abstractPiece import Piece
+from ..board.pieces.queen import Queen
+from ..board.pieces.king import King
+from ..board.pieces.bishop import Bishop
+from ..board.pieces.knight import Knight
+from ..board.pieces.rook import Rook
+from ..board.pieces.pawn import Pawn
 
 class BoardSizeError(Exception):
     """Custom exception for board size errors."""
@@ -124,60 +124,43 @@ class Board:
                 return 0
         return self._get_score()
     
-    def white_pieces_to_json(self):
-
-        white_pieces = []
-
-        for piece in self._white_pieces:
-            if isinstance(piece, Pawn) and 8 <= piece.pos() <= 15:
-
-                temp = []
-
-                for move in piece.getMoves():
-                    move = self.intToCoord(move)
-                    temp += [f'{move}=B', f'{move}=N', f'{move}=R', f'{move}=Q']
-
-                white_pieces.append(
-                {
-                    'Piece': piece.toChar(), # char
-                    'Moves': temp, # list[str]
-                    'Position':self.intToCoord(piece.pos()) # int
-                })
-            else:
-                white_pieces.append(
-                {
-                    'Piece': piece.toChar(), # char
-                    'Moves': self.intToCoord(piece.getMoves()), # list[int]
-                    'Position':self.intToCoord(piece.pos()) # int
-                })
-
-        return white_pieces
-    
-    def black_pieces_to_json(self):
-
-        black_pieces = []
-
-        for piece in self._black_pieces:
+    def _piece_to_json(self, piece_list : list[Piece]):
+        return_piece_list = []
+        for piece in piece_list:
             if isinstance(piece, Pawn) and 48 <= piece.pos() <= 55:
-                temp = []
+                promote_moves = []
                 for move in piece.getMoves():
-                    move = self.intToCoord(move)
-                    temp += [f'{move}=B', f'{move}=N', f'{move}=R', f'{move}=Q']
-                black_pieces.append(
-                {
-                    'Piece': piece.toChar(), # char
-                    'Moves': temp, # list[str]
-                    'Position': self.intToCoord(piece.pos()) # str
-                })
+                    promote_moves += [f'{move}=B', f'{move}=N', f'{move}=R', f'{move}=Q']
+                return_piece_list.append({
+                                            'position': self.intToCoord(piece.pos()), 
+                                            'piece': piece.toChar(), 
+                                            'moves': [f'{self.intToCoord(int(move.split("=")[0]))}={move.split("=")[1]}' for move in promote_moves]})
             else:
-                black_pieces.append(
-                {
-                    'Piece': piece.toChar(), # char
-                    'Moves': self.intToCoord(piece.getMoves()), # list[str]
-                    'Position': self.intToCoord(piece.pos()) # str
-                })
+                return_piece_list.append({
+                                            'position': self.intToCoord(piece.pos()), 
+                                            'piece': piece.toChar(), 
+                                            'moves': [self.intToCoord(move) for move in piece.getMoves()]})
+        return return_piece_list
 
-        return black_pieces
+    def white_piece_to_json(self):
+        if self.is_whites_turn:
+            return self._piece_to_json(self._white_pieces)
+        else:
+            obj = self._piece_to_json(self._white_pieces)
+
+            for item in obj:
+                item['moves'] = []
+        return obj
+    
+    def black_piece_to_json(self):
+        if not self.is_whites_turn:
+            return self._piece_to_json(self._white_pieces)
+        else:
+            obj = self._piece_to_json(self._white_pieces)
+
+            for item in obj:
+                item['moves'] = []
+        return obj
     
     def get_turn(self) -> str:
         return "White" if self.is_whites_turn else "Black"

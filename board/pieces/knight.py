@@ -1,5 +1,5 @@
-from moves import knightMoves
-from board.pieces.abstractPiece import Piece
+from .moves import knightMoves
+from ...board.pieces.abstractPiece import Piece
 
 
 

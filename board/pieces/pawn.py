@@ -1,5 +1,5 @@
-from moves import pawnMove
-from board.pieces.abstractPiece import Piece
+from .moves import pawnMove
+from ...board.pieces.abstractPiece import Piece
 
 class Pawn(Piece):
 
